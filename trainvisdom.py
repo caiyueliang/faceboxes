@@ -1,3 +1,4 @@
+# encoding:utf-8
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch
@@ -61,7 +62,7 @@ for epoch in range(num_epochs):
             images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
 
         loc_preds, conf_preds = net(images)
-        loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
+        loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)          # 计算损失
         total_loss += loss.data[0]
 
         optimizer.zero_grad()

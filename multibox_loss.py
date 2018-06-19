@@ -21,7 +21,7 @@ class MultiBoxLoss(nn.Module):
         xmax = x.data.max()
         # xmax = xmax.detach()
         log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1, keepdim=True)) + xmax
-        return log_sum_exp - x.gather(1, y.view(-1,1))
+        return log_sum_exp - x.gather(1, y.view(-1, 1))
 
     def hard_negative_mining(self, conf_loss, pos):
         '''
