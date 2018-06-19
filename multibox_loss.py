@@ -58,7 +58,7 @@ class MultiBoxLoss(nn.Module):
         # print(conf_targets.size())
         num_matched_boxes = pos.data.long().sum()
         if num_matched_boxes == 0:
-            return Variable(torch.Tensor([0]),requires_grad=True)
+            return Variable(torch.Tensor([0]), requires_grad=True)
         # print('ok2')
         pos_mask1 = pos.unsqueeze(2).expand_as(loc_preds)
         # print(pos_mask1.size())
