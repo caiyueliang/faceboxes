@@ -88,13 +88,14 @@ class FaceBox(nn.Module):
         print('inception2', x.size())
         x = self.inception3(x)
         print('inception3', x.size())
-
         hs.append(x)
+
         x = self.conv3_1(x)
         print('conv3_1', x.size())
         x = self.conv3_2(x)
         print('conv3_2', x.size())
         hs.append(x)
+
         x = self.conv4_1(x)
         print('conv4_1', x.size())
         x = self.conv4_2(x)
