@@ -134,9 +134,9 @@ if __name__ == '__main__':
     root_dir = "/cyl_data/car_detect_train"
     # root_dir = "/cyl_data/car_detect_test"
 
-    image_dir = "ketuo_1"
+    # image_dir = "ketuo_1"
     # image_dir = "daozha_1"
-    # image_dir = "special_1"
+    image_dir = "special_1"
 
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
