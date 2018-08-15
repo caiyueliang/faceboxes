@@ -20,7 +20,7 @@ from common import common as common
 #         cv2.circle(img, (x, y), 100, (255, 0, 0), -1)
 
 
-class SignCarPoint:
+class SignCarLabel:
     def __init__(self, image_dir, label_file, index_file):
         self.img_files = common.get_files(image_dir)
         self.image_dir = image_dir
@@ -109,6 +109,7 @@ class SignCarPoint:
                     cv2.imshow('sign_image', self.img)
                     self.car_points = []
 
+
 if __name__ == '__main__':
     # image_dir = "/cyl_data/car_plate_test_1"
     # label_file = "./car_plate_test_1_label.txt"
@@ -117,6 +118,6 @@ if __name__ == '__main__':
     image_dir = "/cyl_data/car_plate_train"
     label_file = "./car_plate_train_label.txt"
     index_file = "./car_plate_train_index.txt"
-    sign_point = SignCarPoint(image_dir, label_file, index_file)
+    sign_point = SignCarLabel(image_dir, label_file, index_file)
 
     sign_point.sign_start()
