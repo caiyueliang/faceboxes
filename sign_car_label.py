@@ -21,8 +21,8 @@ from common import common as common
 
 
 class SignCarLabel:
-    def __init__(self, image_dir, label_file, index_file):
-        self.img_files = common.get_files(image_dir)
+    def __init__(self, root_dir, image_dir, label_file, index_file):
+        self.img_files = common.get_files(os.path.join(root_dir, image_dir))
         self.image_dir = image_dir
         self.label_file = label_file
         self.car_points = []
@@ -31,15 +31,16 @@ class SignCarLabel:
 
     def mouse_click_events(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            if len(self.car_points) < 4:
-                cv2.circle(self.img, (x, y), 3, (0, 0, 255), -1)
-                print('click: [%d, %d]' % (x, y))
-                self.car_points.append((x, y))
-            else:
-                print('self.car_points is too long, %s' % str(self.car_points))
+            cv2.circle(self.img, (x, y), 3, (0, 0, 255), -1)
+            print('click: [%d, %d]' % (x, y))
+            self.car_points.append((x, y))
+
+            if len(self.car_points) % 2 == 0:
+                cv2.rectangle(self.img, self.car_points[len(self.car_points)-2], self.car_points[len(self.car_points)-1],
+                              (0, 255, 0), 2)
 
     def sign_start(self, restart=False):
-        times = 2
+        times = 1
 
         cv2.namedWindow('sign_image')
         cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
@@ -69,9 +70,16 @@ class SignCarLabel:
                 k = cv2.waitKey(1) & 0xFF
                 if k == ord('s'):
                     print('save ...')
-                    data = self.img_files[start_i] + " " + str(len(self.car_points))
-                    for (x, y) in self.car_points:
-                        data += ' ' + str(x/float(times)) + ' ' + str(y/float(times))
+                    data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
+                    for i in range(len(self.car_points) / 2):
+                        data += ' ' + str(self.car_points[2*i][0]/float(times)) + \
+                                ' ' + str(self.car_points[2*i][1]/float(times)) + \
+                                ' ' + str((self.car_points[2*i+1][0]-self.car_points[2*i][0])/float(times)) + \
+                                ' ' + str((self.car_points[2*i+1][1]-self.car_points[2*i][1])/float(times)) + \
+                                ' 1'
+
+                    # for (x, y) in self.car_points:
+                    #     data += ' ' + str(x/float(times)) + ' ' + str(y/float(times))
                     data += '\n'
 
                     common.write_data(self.label_file, data, 'a+')
@@ -81,7 +89,7 @@ class SignCarLabel:
                     break
 
                 if k == ord('d'):
-                    print('save ...')
+                    print('delete ...')
                     common.exe_cmd('rm -r ' + self.img_files[start_i])
                     self.img_files.pop(start_i)
 
@@ -92,7 +100,7 @@ class SignCarLabel:
 
                 # 重新加载图片
                 if k == ord('r'):
-                    print('re sign ...')
+                    print('resign ...')
                     self.img = cv2.imread(self.img_files[start_i])
                     self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
                     cv2.imshow('sign_image', self.img)
@@ -101,7 +109,7 @@ class SignCarLabel:
                 if k == ord('c'):
                     print('change size ...')
                     if times == 2:
-                        times = 4
+                        times = 1
                     else:
                         times = 2
                     self.img = cv2.imread(self.img_files[start_i])
@@ -115,9 +123,10 @@ if __name__ == '__main__':
     # label_file = "./car_plate_test_1_label.txt"
     # index_file = "./car_plate_test_1_index.txt"
 
-    image_dir = "/cyl_data/car_plate_train"
-    label_file = "./car_plate_train_label.txt"
-    index_file = "./car_plate_train_index.txt"
-    sign_point = SignCarLabel(image_dir, label_file, index_file)
+    root_dir = "/cyl_data/car_detect_train"
+    image_dir = "ketuo_1"
+    label_file = "./label/car_detect_label.txt"
+    index_file = "./label/car_detect_index.txt"
+    sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
 
     sign_point.sign_start()
