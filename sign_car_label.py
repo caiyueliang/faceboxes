@@ -131,9 +131,13 @@ if __name__ == '__main__':
     # label_file = "./car_plate_test_1_label.txt"
     # index_file = "./car_plate_test_1_index.txt"
 
-    # root_dir = "/cyl_data/car_detect_train"
-    root_dir = "/cyl_data/car_detect_test"
-    image_dir = "daozha_1"
+    root_dir = "/cyl_data/car_detect_train"
+    # root_dir = "/cyl_data/car_detect_test"
+
+    image_dir = "ketuo_1"
+    # image_dir = "daozha_1"
+    # image_dir = "special_1"
+
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
     sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
