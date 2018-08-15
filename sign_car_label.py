@@ -60,7 +60,9 @@ class SignCarLabel:
             print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
 
             self.img = cv2.imread(self.img_files[start_i])
-            self.img = cv2.resize(self.img, (self.img.shape[0]*times, self.img.shape[1]*times))
+            print(self.img.shape)
+            self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
+            print(self.img.shape)
             cv2.imshow('sign_image', self.img)
 
             while True:
@@ -94,7 +96,9 @@ class SignCarLabel:
                     self.img_files.pop(start_i)
 
                     self.img = cv2.imread(self.img_files[start_i])
-                    self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
+                    print(self.img.shape)
+                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
+                    print(self.img.shape)
                     cv2.imshow('sign_image', self.img)
                     self.car_points = []
 
@@ -102,7 +106,9 @@ class SignCarLabel:
                 if k == ord('r'):
                     print('resign ...')
                     self.img = cv2.imread(self.img_files[start_i])
-                    self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
+                    print(self.img.shape)
+                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0]*times))
+                    print(self.img.shape)
                     cv2.imshow('sign_image', self.img)
                     self.car_points = []
 
@@ -113,7 +119,9 @@ class SignCarLabel:
                     else:
                         times = 2
                     self.img = cv2.imread(self.img_files[start_i])
-                    self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
+                    print(self.img.shape)
+                    self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
+                    print(self.img.shape)
                     cv2.imshow('sign_image', self.img)
                     self.car_points = []
 
@@ -125,7 +133,7 @@ if __name__ == '__main__':
 
     # root_dir = "/cyl_data/car_detect_train"
     root_dir = "/cyl_data/car_detect_test"
-    image_dir = "ketuo_1"
+    image_dir = "daozha_1"
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
     sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
