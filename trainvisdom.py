@@ -33,7 +33,8 @@ criterion = MultiBoxLoss()
 # optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=0.0003)
 optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
 
-train_dataset = ListDataset(root=file_root,list_file='label/box_label.txt',train=True,transform = [transforms.ToTensor()] )
+train_dataset = ListDataset(root=file_root, list_file='label/box_label.txt', train=True,
+                            transform=[transforms.ToTensor()])
 train_loader = DataLoader(train_dataset,batch_size=batch_size,shuffle=True,num_workers=5)
 print('the dataset has %d images' % (len(train_dataset)))
 print('the batch_size is %d' % (batch_size))
