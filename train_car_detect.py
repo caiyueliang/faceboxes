@@ -30,7 +30,9 @@ if __name__ == '__main__':
     test_label = './label/car_detect_test_label.txt'
 
     common.mkdir_if_not_exist('./weight')
-    model_file = './weight/car_detect.pt'             # 保存的模型名称
+    model_file = 'weight/car_detect.pt'                 # 保存的模型名称
+
+    best_loss = 10
 
     net = FaceBox()
     if use_gpu:
@@ -89,6 +91,19 @@ if __name__ == '__main__':
         print ('Epoch [%d/%d], average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader)))
         num_iter = num_iter + 1
         vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
+
+        if best_loss > (total_loss / len(train_loader)):
+            best_loss = total_loss / len(train_loader)
+            str_list = model_file.split('.')
+            best_model_file = ""
+            for str_index in range(len(str_list)):
+                best_model_file = best_model_file + str_list[str_index]
+                if str_index == (len(str_list) - 2):
+                    best_model_file += '_best'
+                if str_index != (len(str_list) - 1):
+                    best_model_file += '.'
+                print('[saving model] ...', best_model_file)
+                torch.save(net.state_dict(), best_model_file)  # 保存最好的模型
 
     print('[saving model] ...', model_file)
     torch.save(net.state_dict(), model_file)
