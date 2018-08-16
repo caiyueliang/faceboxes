@@ -12,6 +12,7 @@ from multibox_loss import MultiBoxLoss
 from dataset import ListDataset
 from common import common
 import visdom
+import cv2
 import numpy as np
 from encoderl import DataEncoder
 
@@ -20,9 +21,24 @@ use_gpu = torch.cuda.is_available()
 
 re_train = False
 learning_rate = 0.001
-num_epochs = 200
+num_epochs = 0
 decay_epoch = 60
 batch_size = 16
+
+
+def show_img(img, boxes):
+    print(img.size())
+    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+    # img = cv2.cvtColor(np.asarray(img), cv2.COLOR_BGR2GRAY)
+    h, w, c = img.shape
+    print(h, w, c)
+    for i in range(len(boxes)):
+        box = boxes[i]
+        print('box', box)
+        # cv2.circle(img, (int(output[2 * i]), int(output[2 * i + 1])), 3, (0, 0, 255), -1)
+        cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0), 2)
+    cv2.imshow('show_img', img)
+    cv2.waitKey(0)
 
 
 def test(net, test_loader, show_info=False):
@@ -45,6 +61,7 @@ def test(net, test_loader, show_info=False):
             # print('0 pre_label', loc_preds.size(), conf_preds.size())
             # print('0 pre_label', loc_preds, conf_preds)
 
+            print("loc_preds len: ", len(loc_preds))
             for i in range(len(loc_preds)):
                 # print('2 pre_label', loc_preds[i].size(), conf_preds[i].size())
                 # print('3 pre_label', loc_preds[i], conf_preds[i])
@@ -53,8 +70,9 @@ def test(net, test_loader, show_info=False):
                 print('boxes', boxes)
                 print('labels', labels)
                 print('max_conf', max_conf)
-        #     for i in range(len(output[:, 1])):
-        #         self.show_img(img_files[i], output[i].cpu().detach().numpy(), target[i].cpu().detach().numpy())
+
+                show_img(images[i].permute(1, 2, 0), boxes.cpu().detach().numpy())
+                # show_img(images[i], boxes.cpu().detach().numpy())
 
     avg_loss = total_test_loss / len(test_loader)
     print('[Test] avg_loss: {:.4f}\n'.format(avg_loss))
