@@ -63,9 +63,7 @@ if __name__ == '__main__':
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
 
-        print('\n\nStarting epoch %d / %d' % (epoch + 1, num_epochs))
-        print('Learning Rate for this epoch: {}'.format(learning_rate))
-
+        print('\n[epoch] %d / %d; [lr] %f' % (epoch + 1, num_epochs, learning_rate))
         total_loss = 0.
 
         for i, (images, loc_targets, conf_targets) in enumerate(train_loader):
@@ -82,11 +80,15 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            if (i + 1) % 50 == 0:
-                print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f'
-                       % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.item(), total_loss / (i + 1)))
-                num_iter = num_iter + 1
-                vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]), win=win, update='append')
+            # if (i + 1) % 50 == 0:
+            #     print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f'
+            #            % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.item(), total_loss / (i + 1)))
+            #     num_iter = num_iter + 1
+            #     vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]), win=win, update='append')
+
+        print ('Epoch [%d/%d], average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader)))
+        num_iter = num_iter + 1
+        vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
 
     print('[saving model] ...', model_file)
     torch.save(net.state_dict(), model_file)
