@@ -19,7 +19,8 @@ use_gpu = torch.cuda.is_available()
 
 re_train = False
 learning_rate = 0.001
-num_epochs = 300
+num_epochs = 200
+decay_epoch = 60
 batch_size = 16
 
 
@@ -54,13 +55,14 @@ if __name__ == '__main__':
     print('the dataset has %d images' % (len(train_dataset)))
     print('the batch_size is %d' % batch_size)
 
+    # 可视化工具
     num_iter = 0
-    vis = visdom.Visdom()                               # 可视化工具
+    vis = visdom.Visdom()
     win = vis.line(Y=np.array([0]), X=np.array([0]))
 
     net.train()
     for epoch in range(num_epochs):
-        if epoch == 190 or epoch == 250:
+        if epoch >= decay_epoch and epoch % decay_epoch == 0:
             learning_rate *= 0.1
         for param_group in optimizer.param_groups:
             param_group['lr'] = learning_rate
@@ -82,11 +84,6 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            # if (i + 1) % 50 == 0:
-            #     print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f'
-            #            % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.item(), total_loss / (i + 1)))
-            #     num_iter = num_iter + 1
-            #     vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]), win=win, update='append')
 
         print ('Epoch [%d/%d] average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader)))
         num_iter = num_iter + 1
