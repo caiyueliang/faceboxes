@@ -13,6 +13,7 @@ from dataset import ListDataset
 from common import common
 import visdom
 import numpy as np
+from encoderl import DataEncoder
 
 
 use_gpu = torch.cuda.is_available()
@@ -21,11 +22,12 @@ re_train = False
 learning_rate = 0.001
 num_epochs = 200
 decay_epoch = 60
-batch_size = 8
+batch_size = 16
 
 
 def test(net, test_loader, show_info=False):
     total_test_loss = 0
+    data_encoder = DataEncoder()
 
     # 测试集
     # for data, target in test_loader:
@@ -39,11 +41,18 @@ def test(net, test_loader, show_info=False):
         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
         total_test_loss += loss.item()
 
-        # if show_info is True:
-        #     print('true_target', target)
-        #     print('  pre_label', label)
+        if show_info is True:
+            # print('0 pre_label', loc_preds.size(), conf_preds.size())
+            # print('0 pre_label', loc_preds, conf_preds)
 
-        # if show_img:
+            for i in range(len(loc_preds)):
+                # print('2 pre_label', loc_preds[i].size(), conf_preds[i].size())
+                # print('3 pre_label', loc_preds[i], conf_preds[i])
+
+                boxes, labels, max_conf = data_encoder.decode(loc_preds[i], conf_preds[i], use_gpu)
+                print('boxes', boxes)
+                print('labels', labels)
+                print('max_conf', max_conf)
         #     for i in range(len(output[:, 1])):
         #         self.show_img(img_files[i], output[i].cpu().detach().numpy(), target[i].cpu().detach().numpy())
 
@@ -65,6 +74,7 @@ if __name__ == '__main__':
 
     net = FaceBox()
     if use_gpu:
+        print('[use gpu] ...')
         net.cuda()
 
     # 加载模型
@@ -134,8 +144,8 @@ if __name__ == '__main__':
         test_loss = test(net, test_loader)
 
         # 保存最好的模型
-        if best_loss > (total_loss / len(train_loader)):
-            best_loss = total_loss / len(train_loader)
+        if best_loss > test_loss:
+            best_loss = test_loss
             str_list = model_file.split('.')
             best_model_file = ""
             for str_index in range(len(str_list)):
@@ -144,9 +154,10 @@ if __name__ == '__main__':
                     best_model_file += '_best'
                 if str_index != (len(str_list) - 1):
                     best_model_file += '.'
-                print('[saving best model] ...', best_model_file)
-                torch.save(net.state_dict(), best_model_file)
+            print('[saving best model] ...', best_model_file)
+            torch.save(net.state_dict(), best_model_file)
 
     print('[saving model] ...', model_file)
     torch.save(net.state_dict(), model_file)
 
+    test(net, test_loader, show_info=True)

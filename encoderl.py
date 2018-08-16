@@ -228,10 +228,10 @@ class DataEncoder:
             if order.numel() == 1:
                 break
 
-            xx1 = x1[order[1:]].clamp(min=x1[i])
-            yy1 = y1[order[1:]].clamp(min=y1[i])
-            xx2 = x2[order[1:]].clamp(max=x2[i])
-            yy2 = y2[order[1:]].clamp(max=y2[i])
+            xx1 = x1[order[1:]].clamp(min=x1[i].item())
+            yy1 = y1[order[1:]].clamp(min=y1[i].item())
+            xx2 = x2[order[1:]].clamp(max=x2[i].item())
+            yy2 = y2[order[1:]].clamp(max=y2[i].item())
 
             w = (xx2-xx1).clamp(min=0)
             h = (yy2-yy1).clamp(min=0)
@@ -244,32 +244,40 @@ class DataEncoder:
             order = order[ids+1]
         return torch.LongTensor(keep)
 
-    def decode(self,loc,conf):
+    def decode(self, loc, conf, use_gpu):
         '''
         將预测出的 loc/conf转换成真实的人脸框
-        loc [21842,4]
-        conf [21824,2]
+        loc [21842, 4]
+        conf [21824, 2]
         '''
+        # print('decode', loc, conf)
         variances = [0.1, 0.2]
-        cxcy = loc[:,:2] * variances[0] * self.default_boxes[:,2:] + self.default_boxes[:,:2]
-        wh = torch.exp(loc[:,2:] * variances[1]) * self.default_boxes[:,2:]
-        boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
+
+        if use_gpu:
+            cxcy = loc[:, :2].cuda() * variances[0] * self.default_boxes[:, 2:].cuda() + self.default_boxes[:, :2].cuda()
+            wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:].cuda()
+            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
+        else:
+            cxcy = loc[:, :2].cuda() * variances[0] * self.default_boxes[:, 2:] + self.default_boxes[:, :2]
+            wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:]
+            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
 
         conf[:,0] = 0.4
 
         max_conf, labels = conf.max(1)                      # [21842,1]
         # print(max_conf)
-        print('labels', labels.long().sum())
-        if labels.long().sum() is 0:
+        # print('labels', labels.long().sum().item())
+        if labels.long().sum().item() is 0:
             sconf, slabel = conf.max(0)
             max_conf[slabel[0:5]] = sconf[0:5]
             labels[slabel[0:5]] = 1
 
+        # print('labels', labels)
         ids = labels.nonzero().squeeze(1)
         # print('ids', ids)
         # print('boxes', boxes.size(), boxes[ids])
 
-        keep = self.nms(boxes[ids],max_conf[ids])#.squeeze(1))
+        keep = self.nms(boxes[ids], max_conf[ids])#.squeeze(1))
 
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
 
