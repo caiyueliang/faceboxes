@@ -21,7 +21,35 @@ re_train = False
 learning_rate = 0.001
 num_epochs = 200
 decay_epoch = 60
-batch_size = 16
+batch_size = 8
+
+
+def test(net, test_loader, show_info=False):
+    total_test_loss = 0
+
+    # 测试集
+    # for data, target in test_loader:
+    for images, loc_targets, conf_targets in test_loader:
+        images, loc_targets, conf_targets = Variable(images), Variable(loc_targets), Variable(conf_targets)
+
+        if use_gpu:
+            images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
+
+        loc_preds, conf_preds = net(images)
+        loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
+        total_test_loss += loss.item()
+
+        # if show_info is True:
+        #     print('true_target', target)
+        #     print('  pre_label', label)
+
+        # if show_img:
+        #     for i in range(len(output[:, 1])):
+        #         self.show_img(img_files[i], output[i].cpu().detach().numpy(), target[i].cpu().detach().numpy())
+
+    avg_loss = total_test_loss / len(test_loader)
+    print('[Test] avg_loss: {:.4f}\n'.format(avg_loss))
+    return avg_loss
 
 
 if __name__ == '__main__':
@@ -49,9 +77,23 @@ if __name__ == '__main__':
     # optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=0.0003)
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
 
-    train_dataset = ListDataset(root=train_root, list_file=train_label, train=True,
-                                transform=[transforms.ToTensor()])
+    # RandomHorizontalFlip
+    transform_train = transforms.Compose([
+        # transforms.Resize(self.img_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
+    ])
+    transform_test = transforms.Compose([
+        # T.Resize(self.img_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
+    ])
+
+    train_dataset = ListDataset(root=train_root, list_file=train_label, train=True, transform=transform_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
+    test_dataset = ListDataset(root=test_root, list_file=test_label, train=False, transform=transform_test)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
+
     print('the dataset has %d images' % (len(train_dataset)))
     print('the batch_size is %d' % batch_size)
 
@@ -88,6 +130,8 @@ if __name__ == '__main__':
         print ('Epoch [%d/%d] average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader)))
         num_iter = num_iter + 1
         vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
+
+        test_loss = test(net, test_loader)
 
         # 保存最好的模型
         if best_loss > (total_loss / len(train_loader)):

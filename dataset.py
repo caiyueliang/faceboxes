@@ -74,8 +74,9 @@ class ListDataset(data.Dataset):
         img = cv2.resize(img, (self.image_size, self.image_size))
 
         boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)
-        for t in self.transform:
-            img = t(img)
+        # for t in self.transform:
+        #     img = t(img)
+        img = self.transform(img)
 
         loc_target, conf_target = self.data_encoder.encode(boxes, labels)
 
