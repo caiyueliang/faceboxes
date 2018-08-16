@@ -92,6 +92,7 @@ if __name__ == '__main__':
         num_iter = num_iter + 1
         vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
 
+        # 保存最好的模型
         if best_loss > (total_loss / len(train_loader)):
             best_loss = total_loss / len(train_loader)
             str_list = model_file.split('.')
@@ -102,8 +103,8 @@ if __name__ == '__main__':
                     best_model_file += '_best'
                 if str_index != (len(str_list) - 1):
                     best_model_file += '.'
-                print('[saving model] ...', best_model_file)
-                torch.save(net.state_dict(), best_model_file)  # 保存最好的模型
+                print('[saving best model] ...', best_model_file)
+                torch.save(net.state_dict(), best_model_file)
 
     print('[saving model] ...', model_file)
     torch.save(net.state_dict(), model_file)
