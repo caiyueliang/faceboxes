@@ -136,7 +136,8 @@ if __name__ == '__main__':
 
     # image_dir = "ketuo_1"
     # image_dir = "daozha_1"
-    image_dir = "special_1"
+    image_dir = "daozha_2"
+    # image_dir = "special_1"
 
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
