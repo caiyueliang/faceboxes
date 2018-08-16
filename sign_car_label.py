@@ -27,6 +27,8 @@ class SignCarLabel:
         self.label_file = label_file
         self.car_points = []
         self.index_file = index_file
+
+        print("[len] ", len(self.img_files))
         return
 
     def mouse_click_events(self, event, x, y, flags, param):
@@ -131,16 +133,18 @@ if __name__ == '__main__':
     # label_file = "./car_plate_test_1_label.txt"
     # index_file = "./car_plate_test_1_index.txt"
 
-    root_dir = "/cyl_data/car_detect_train"
-    # root_dir = "/cyl_data/car_detect_test"
+    root_dir = '../Data/car_rough_detect/car_detect_train/'
+    # root_dir = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
 
     # image_dir = "ketuo_1"
     # image_dir = "daozha_1"
-    image_dir = "daozha_2"
-    # image_dir = "special_1"
+    # image_dir = "daozha_2"
+    image_dir = "special_1"
 
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
     sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
 
+    print label_file
+    print index_file
     sign_point.sign_start()

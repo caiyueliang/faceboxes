@@ -18,9 +18,9 @@ import numpy as np
 if __name__ == '__main__':
     use_gpu = torch.cuda.is_available()
     # file_root = os.path.expanduser('~/codedata/aflw/')
-    train_root = '/cyl_data/car_detect_train/'
+    train_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_train/')
     train_label = './label/car_detect_train_label.txt'
-    test_root = '/cyl_data/car_detect_test/'
+    test_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
     test_label = './label/car_detect_test_label.txt'
 
     learning_rate = 0.001
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         net.cuda()
 
     print('load model...')
-    # net.load_state_dict(torch.load('weight/car_detect.pt'))
+    net.load_state_dict(torch.load('weight/car_detect.pt'))
 
     criterion = MultiBoxLoss()
 
