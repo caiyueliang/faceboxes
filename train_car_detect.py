@@ -10,29 +10,36 @@ from torch.autograd import Variable
 from networks import FaceBox
 from multibox_loss import MultiBoxLoss
 from dataset import ListDataset
-
+from common import common
 import visdom
 import numpy as np
 
 
+use_gpu = torch.cuda.is_available()
+
+re_train = False
+learning_rate = 0.001
+num_epochs = 300
+batch_size = 16
+
+
 if __name__ == '__main__':
-    use_gpu = torch.cuda.is_available()
-    # file_root = os.path.expanduser('~/codedata/aflw/')
     train_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_train/')
     train_label = './label/car_detect_train_label.txt'
     test_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
     test_label = './label/car_detect_test_label.txt'
 
-    learning_rate = 0.001
-    num_epochs = 300
-    batch_size = 1
+    common.mkdir_if_not_exist('./weight')
+    model_file = './weight/car_detect.pt'             # 保存的模型名称
 
     net = FaceBox()
     if use_gpu:
         net.cuda()
 
-    print('load model...')
-    net.load_state_dict(torch.load('weight/car_detect.pt'))
+    # 加载模型
+    if os.path.exists(model_file) and not re_train:
+        print('[load model] ...', model_file)
+        net.load_state_dict(torch.load(model_file))
 
     criterion = MultiBoxLoss()
 
@@ -70,19 +77,17 @@ if __name__ == '__main__':
 
             loc_preds, conf_preds = net(images)
             loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)          # 计算损失
-            total_loss += loss.data[0]
+            total_loss += loss.item()
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             if (i + 1) % 50 == 0:
                 print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f'
-                       % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.data[0], total_loss / (i + 1)))
+                       % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.item(), total_loss / (i + 1)))
                 num_iter = num_iter + 1
                 vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]), win=win, update='append')
 
-        if not os.path.exists('weight/'):
-            os.mkdir('weight')
-        print('saving model ...')
-        torch.save(net.state_dict(), 'weight/car_detect.pt')
+    print('[saving model] ...', model_file)
+    torch.save(net.state_dict(), model_file)
 
