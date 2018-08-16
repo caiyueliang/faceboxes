@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     learning_rate = 0.001
     num_epochs = 300
-    batch_size = 16
+    batch_size = 1
 
     net = FaceBox()
     if use_gpu:
@@ -41,9 +41,9 @@ if __name__ == '__main__':
 
     train_dataset = ListDataset(root=train_root, list_file=train_label, train=True,
                                 transform=[transforms.ToTensor()])
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=5)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
     print('the dataset has %d images' % (len(train_dataset)))
-    print('the batch_size is %d' % (batch_size))
+    print('the batch_size is %d' % batch_size)
 
     num_iter = 0
     vis = visdom.Visdom()

@@ -95,7 +95,9 @@ class MultiBoxLoss(nn.Module):
         targets = conf_targets[pos_and_neg]
         conf_loss = F.cross_entropy(preds, targets, size_average=False)
 
-        N = num_pos.data.sum()
+        # N = num_pos.data.sum()
+        N = num_pos.data.sum().item()
+        # print(N, type(N))
         loc_loss /= N
         conf_loss /= N
         print('loc_loss:%f conf_loss:%f, pos_num:%d' % (loc_loss.data[0], conf_loss.data[0], N))

@@ -14,11 +14,11 @@ class DataEncoder:
         '''
         scale = 1024.
         steps = [s / scale for s in (32, 64, 128)]
-        sizes = [s / scale for s in (32, 256, 512)] # 当32改为64时，achor与label匹配的正样本数目更多
-        aspect_ratios = ((1,2,4), (1,), (1,))
+        sizes = [s / scale for s in (32, 256, 512)]     # 当32改为64时，achor与label匹配的正样本数目更多
+        aspect_ratios = ((1, 2, 4), (1,), (1,))
         feature_map_sizes = (32, 16, 8)
 
-        density = [[-3,-1,1,3],[-1,1],[0]] # density for output layer1
+        density = [[-3, -1, 1, 3], [-1, 1], [0]]        # density for output layer1
         # density = [[0],[0],[0]] # density for output layer1
 
         num_layers = len(feature_map_sizes)
@@ -90,7 +90,7 @@ class DataEncoder:
         print('conf', type(conf), conf.size(), conf.long().sum())
         print('loc', loc)
         # img = cv2.imread('test1.jpg')
-        w,h,_ = img.shape
+        w, h, _ = img.shape
         for box in boxes:
             cv2.rectangle(img, (int(box[0]*w),int(box[1]*w)), (int(box[2]*w), int(box[3]*w)), (0,255,0))
 
@@ -156,55 +156,59 @@ class DataEncoder:
         boxes_org = boxes
 
         # print(boxes, classes)
-        default_boxes = self.default_boxes #[21824,4]
+        default_boxes = self.default_boxes              # [21824,4]
         num_default_boxes = default_boxes.size(0)
-        num_obj=boxes.size(0)  #人脸个数
-        #print('num_faces {}'.format(num_obj))
+        num_obj = boxes.size(0)                         # 人脸个数
+        # print('num_faces {}'.format(num_obj))
+
         iou = self.iou(
             boxes,
-            torch.cat([default_boxes[:,:2] - default_boxes[:,2:]/2,
-                        default_boxes[:,:2] + default_boxes[:,2:]/2], 1))
+            torch.cat([default_boxes[:, :2]-default_boxes[:, 2:]/2, default_boxes[:, :2]+default_boxes[:, 2:]/2], 1))
         # iou = self.iou(boxes, default_boxes)
-        #print('iou size {}'.format(iou.size()))
-        max_iou, max_iou_index = iou.max(1) #为每一个bounding box不管IOU大小，都设置一个与之IOU最大的default_box
-        iou, max_index= iou.max(0) #每一个default_boxes对应到与之IOU最大的bounding box上
+        # print('iou size {}'.format(iou.size()))
 
-        #print(max(iou))
-        max_index.squeeze_(0)  # torch.LongTensor 21824
+        max_iou, max_iou_index = iou.max(1)             # 为每一个bounding box不管IOU大小，都设置一个与之IOU最大的default_box
+        iou, max_index = iou.max(0)                     # 每一个default_boxes对应到与之IOU最大的bounding box上
+
+        # print(max(iou))
+        max_index.squeeze_(0)                           # torch.LongTensor 21824
         iou.squeeze_(0)
         # print('boxes', boxes.size(), boxes, 'max_index', max_index)
 
         max_index[max_iou_index] = torch.LongTensor(range(num_obj))
 
-
-        boxes = boxes[max_index] # [21824,4] 是图像label
+        boxes = boxes[max_index]                        # [21824,4]是图像label
         variances = [0.1, 0.2]
-        cxcy = (boxes[:,:2] + boxes[:,2:])/2 - default_boxes[:,:2] # [21824,2]
+        cxcy = (boxes[:, :2] + boxes[:, 2:])/2 - default_boxes[:, :2]       # [21824,2]
         cxcy /= variances[0] * default_boxes[:,2:]
-        wh = (boxes[:,2:] - boxes[:,:2]) / default_boxes[:,2:] # [21824,2]  为什么会出现0宽度？？
-        wh = torch.log(wh) / variances[1] # Variable
+        wh = (boxes[:, 2:] - boxes[:, :2]) / default_boxes[:, 2:]           # [21824,2]  为什么会出现0宽度？？
+        wh = torch.log(wh) / variances[1]                                   # Variable
 
         inf_flag = wh.abs() > 10000
-        if(inf_flag.long().sum() is not 0):
+
+        # print('inf_flag.long().sum()', inf_flag.long().sum().item())
+        # if inf_flag.long().sum() is not 0:
+        if inf_flag.long().sum().item() is not 0:
             print('inf_flag has true', wh, boxes)
             print('org_boxes', boxes_org)
             print('max_iou', max_iou, 'max_iou_index', max_iou_index)
-            raise 'inf error'
+            raise BaseException('[my exception] inf error')
 
-        loc = torch.cat([cxcy, wh], 1) # [21824,4]
-        conf = classes[max_index] #其实都是1 [21824,]
-        conf[iou < threshold] = 0 #iou小的设为背景
-        conf[max_iou_index] = 1 # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
-                                # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
-                                # 做的宽度为0，但是没有被滤掉，是因为max(1)必须为每一个object选择一个
-                                # 与之对应的default_box，需要修改数据集里的label。
+        loc = torch.cat([cxcy, wh], 1)      # [21824,4]
+        conf = classes[max_index]           # 其实都是1 [21824,]
+        conf[iou < threshold] = 0           # iou小的设为背景
+        conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
+                                            # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
+                                            # 做的宽度为0，但是没有被滤掉，是因为max(1)必须为每一个object选择一个
+                                            # 与之对应的default_box，需要修改数据集里的label。
+
         # ('targets', Variable containing:
-         # 318.7500   -1.2500      -inf      -inf
+        # 318.7500   -1.2500      -inf      -inf
         # org_boxes 0.1338  0.3801  0.1338  0.3801
 
         return loc, conf
 
-    def nms(self,bboxes,scores,threshold=0.5):
+    def nms(self, bboxes, scores, threshold=0.5):
         '''
         bboxes(tensor) [N,4]
         scores(tensor) [N,]
@@ -248,12 +252,12 @@ class DataEncoder:
         '''
         variances = [0.1, 0.2]
         cxcy = loc[:,:2] * variances[0] * self.default_boxes[:,2:] + self.default_boxes[:,:2]
-        wh  = torch.exp(loc[:,2:] * variances[1]) * self.default_boxes[:,2:]
-        boxes = torch.cat([cxcy-wh/2,cxcy+wh/2],1) #[21824,4]
+        wh = torch.exp(loc[:,2:] * variances[1]) * self.default_boxes[:,2:]
+        boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
 
         conf[:,0] = 0.4
 
-        max_conf, labels = conf.max(1) #[21842,1]
+        max_conf, labels = conf.max(1)                      # [21842,1]
         # print(max_conf)
         print('labels', labels.long().sum())
         if labels.long().sum() is 0:
@@ -268,6 +272,7 @@ class DataEncoder:
         keep = self.nms(boxes[ids],max_conf[ids])#.squeeze(1))
 
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
+
 
 if __name__ == '__main__':
     dataencoder = DataEncoder()
