@@ -17,11 +17,15 @@ import numpy as np
 
 if __name__ == '__main__':
     use_gpu = torch.cuda.is_available()
-    file_root = os.path.expanduser('~/codedata/aflw/')
+    # file_root = os.path.expanduser('~/codedata/aflw/')
+    train_root = '/cyl_data/car_detect_train/'
+    train_label = './label/car_detect_train_label.txt'
+    test_root = '/cyl_data/car_detect_test/'
+    test_label = './label/car_detect_test_label.txt'
 
     learning_rate = 0.001
     num_epochs = 300
-    batch_size = 32
+    batch_size = 16
 
     net = FaceBox()
     if use_gpu:
@@ -35,9 +39,9 @@ if __name__ == '__main__':
     # optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=0.0003)
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
 
-    train_dataset = ListDataset(root=file_root, list_file='label/box_label.txt', train=True,
+    train_dataset = ListDataset(root=train_root, list_file=train_label, train=True,
                                 transform=[transforms.ToTensor()])
-    train_loader = DataLoader(train_dataset,batch_size=batch_size,shuffle=True,num_workers=5)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=5)
     print('the dataset has %d images' % (len(train_dataset)))
     print('the batch_size is %d' % (batch_size))
 
@@ -82,5 +86,5 @@ if __name__ == '__main__':
         if not os.path.exists('weight/'):
             os.mkdir('weight')
         print('saving model ...')
-        torch.save(net.state_dict(), 'weight/faceboxes.pt')
+        torch.save(net.state_dict(), 'weight/carDetect.pt')
 

@@ -17,14 +17,15 @@ import cv2
 
 from encoderl import DataEncoder
 
-class ListDataset(data.Dataset):
-    image_size=1024
 
-    def __init__(self,root,list_file,train,transform):
+class ListDataset(data.Dataset):
+    image_size = 1024
+
+    def __init__(self, root, list_file, train, transform):
         print('data init')
-        self.root=root
+        self.root = root
         self.train = train
-        self.transform=transform
+        self.transform = transform
         self.fnames = []
         self.boxes = []
         self.labels = []
@@ -32,27 +33,27 @@ class ListDataset(data.Dataset):
         self.data_encoder = DataEncoder()
 
         with open(list_file) as f:
-            lines  = f.readlines()
+            lines = f.readlines()
 
         for line in lines:
             splited = line.strip().split()
             self.fnames.append(splited[0])
             num_faces = int(splited[1])
-            box=[]
-            label=[]
+            box = []
+            label = []
             for i in range(num_faces):
                 x = float(splited[2+5*i])
                 y = float(splited[3+5*i])
                 w = float(splited[4+5*i])
                 h = float(splited[5+5*i])
                 c = int(splited[6+5*i])
-                box.append([x,y,x+w,y+h])
+                box.append([x, y, x+w, y+h])
                 label.append(c)
             self.boxes.append(torch.Tensor(box))
             self.labels.append(torch.LongTensor(label))
         self.num_samples = len(self.boxes)
 
-    def __getitem__(self,idx):
+    def __getitem__(self, idx):
         fname = self.fnames[idx]
         img = cv2.imread(os.path.join(self.root+fname))
         assert img is not None
@@ -67,16 +68,16 @@ class ListDataset(data.Dataset):
             boxwh = boxes[:,2:] - boxes[:,:2]
             # print('boxwh', boxwh)
 
-        h,w,_ = img.shape
-        img = cv2.resize(img,(self.image_size,self.image_size))
+        h, w, _ = img.shape
+        img = cv2.resize(img, (self.image_size, self.image_size))
 
-        boxes /= torch.Tensor([w,h,w,h]).expand_as(boxes)
+        boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)
         for t in self.transform:
             img = t(img)
 
-        loc_target,conf_target = self.data_encoder.encode(boxes,labels)
+        loc_target, conf_target = self.data_encoder.encode(boxes, labels)
 
-        return img,loc_target,conf_target
+        return img, loc_target, conf_target
 
     def random_getim(self):
         idx = random.randrange(0,self.num_samples)
