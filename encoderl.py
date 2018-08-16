@@ -1,10 +1,11 @@
-#encoding:utf-8
+# encoding:utf-8
 
 import torch
 import math
 import itertools
 import cv2
 import numpy as np
+
 
 class DataEncoder:
     def __init__(self):
@@ -145,7 +146,7 @@ class DataEncoder:
             # if conf[i].numpy != 0:
                 # print()
 
-    def encode(self,boxes,classes,threshold=0.35):
+    def encode(self, boxes, classes, threshold=0.35):
         '''
         boxes:[num_obj, 4]
         default_box (x1,y1,x2,y2)
@@ -154,7 +155,7 @@ class DataEncoder:
         '''
         boxes_org = boxes
 
-        #print(boxes,classes)
+        # print(boxes, classes)
         default_boxes = self.default_boxes #[21824,4]
         num_default_boxes = default_boxes.size(0)
         num_obj=boxes.size(0)  #人脸个数
@@ -201,7 +202,7 @@ class DataEncoder:
          # 318.7500   -1.2500      -inf      -inf
         # org_boxes 0.1338  0.3801  0.1338  0.3801
 
-        return loc,conf
+        return loc, conf
 
     def nms(self,bboxes,scores,threshold=0.5):
         '''

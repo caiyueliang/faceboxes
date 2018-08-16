@@ -1,4 +1,4 @@
-#encoding:utf-8
+# encoding:utf-8
 '''
 txt描述文件 image_name.jpg num x y w h 1 x y w h 1 这样就是说一张图片中有两个人脸
 '''
@@ -65,7 +65,7 @@ class ListDataset(data.Dataset):
             img, boxes, labels = self.random_crop(img, boxes, labels)
             img = self.random_bright(img)
             img, boxes = self.random_flip(img, boxes)
-            boxwh = boxes[:,2:] - boxes[:,:2]
+            boxwh = boxes[:, 2:] - boxes[:, :2]
             # print('boxwh', boxwh)
 
         h, w, _ = img.shape
@@ -137,11 +137,11 @@ class ListDataset(data.Dataset):
                     continue
 
                 selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
-                img = im[y:y+h,x:x+w,:]
-                selected_boxes[:,0].add_(-x).clamp_(min=0, max=w)
-                selected_boxes[:,1].add_(-y).clamp_(min=0, max=h)
-                selected_boxes[:,2].add_(-x).clamp_(min=0, max=w)
-                selected_boxes[:,3].add_(-y).clamp_(min=0, max=h)
+                img = im[y:y+h, x:x+w, :]
+                selected_boxes[:, 0].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 1].add_(-y).clamp_(min=0, max=h)
+                selected_boxes[:, 2].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 3].add_(-y).clamp_(min=0, max=h)
                 # print('croped')
 
                 boxes_uniform = selected_boxes / torch.Tensor([w,h,w,h]).expand_as(selected_boxes)
@@ -192,9 +192,10 @@ class ListDataset(data.Dataset):
 
         return img, boxes, labels
 
+
 if __name__ == '__main__':
     file_root = '/home/lxg/codedata/aflw/'
-    train_dataset = ListDataset(root=file_root,list_file='box_label.txt',train=True,transform = [transforms.ToTensor()] )
+    train_dataset = ListDataset(root=file_root, list_file='box_label.txt', train=True, transform=[transforms.ToTensor()])
     print('the dataset has %d image' % (len(train_dataset)))
     for i in range(len(train_dataset)):
         print(i)
@@ -202,11 +203,11 @@ if __name__ == '__main__':
         item = item
         img, boxes, labels = train_dataset.testGet(item)
         # img, boxes = train_dataset[item]
-        img = img.numpy().transpose(1,2,0).copy()*255
+        img = img.numpy().transpose(1, 2, 0).copy()*255
         train_dataset.data_encoder.test_encode(boxes, img, labels)
 
         boxes = boxes.numpy().tolist()
-        w,h,_ = img.shape
+        w, h, _ = img.shape
         # print('img', img.shape)
         # print('boxes', boxes.shape)
 
@@ -215,7 +216,7 @@ if __name__ == '__main__':
             y1 = int(box[1]*h)
             x2 = int(box[2]*w)
             y2 = int(box[3]*h)
-            cv2.rectangle(img, (x1,y1), (x2,y2), (0,0,255))
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255))
             boxw = x2-x1
             boxh = y2-y1
             print(boxw,boxh, box)
