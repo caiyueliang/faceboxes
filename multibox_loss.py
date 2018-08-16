@@ -100,5 +100,5 @@ class MultiBoxLoss(nn.Module):
         # print(N, type(N))
         loc_loss /= N
         conf_loss /= N
-        print('loc_loss:%f conf_loss:%f, pos_num:%d' % (loc_loss.data[0], conf_loss.data[0], N))
+        # print('loc_loss:%f conf_loss:%f, pos_num:%d' % (loc_loss.data[0], conf_loss.data[0], N))
         return loc_loss+conf_loss

@@ -32,7 +32,7 @@ if __name__ == '__main__':
         net.cuda()
 
     print('load model...')
-    # net.load_state_dict(torch.load('weight/faceboxes.pt'))
+    # net.load_state_dict(torch.load('weight/car_detect.pt'))
 
     criterion = MultiBoxLoss()
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     print('the batch_size is %d' % batch_size)
 
     num_iter = 0
-    vis = visdom.Visdom()
+    vis = visdom.Visdom()                               # 可视化工具
     win = vis.line(Y=np.array([0]), X=np.array([0]))
 
     net.train()
@@ -79,12 +79,10 @@ if __name__ == '__main__':
                 print ('Epoch [%d/%d], Iter [%d/%d] Loss: %.4f, average_loss: %.4f'
                        % (epoch + 1, num_epochs, i + 1, len(train_loader), loss.data[0], total_loss / (i + 1)))
                 num_iter = num_iter + 1
-                vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]),
-                         win=win,
-                         update='append')
+                vis.line(Y=np.array([total_loss / (i + 1)]), X=np.array([num_iter]), win=win, update='append')
 
         if not os.path.exists('weight/'):
             os.mkdir('weight')
         print('saving model ...')
-        torch.save(net.state_dict(), 'weight/carDetect.pt')
+        torch.save(net.state_dict(), 'weight/car_detect.pt')
 
