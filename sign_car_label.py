@@ -129,12 +129,8 @@ class SignCarLabel:
 
 
 if __name__ == '__main__':
-    # image_dir = "/cyl_data/car_plate_test_1"
-    # label_file = "./car_plate_test_1_label.txt"
-    # index_file = "./car_plate_test_1_index.txt"
-
-    root_dir = '../Data/car_rough_detect/car_detect_train/'
-    # root_dir = '../Data/car_rough_detect/car_detect_test/'
+    # root_dir = '../Data/car_rough_detect/car_detect_train/'
+    root_dir = '../Data/car_rough_detect/car_detect_test/'
 
     # image_dir = "ketuo_1"
     # image_dir = "daozha_1"
