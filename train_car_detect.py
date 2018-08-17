@@ -65,7 +65,6 @@ def test(net, test_loader, show_info=False):
             for i in range(len(loc_preds)):
                 # print('2 pre_label', loc_preds[i].size(), conf_preds[i].size())
                 # print('3 pre_label', loc_preds[i], conf_preds[i])
-
                 boxes, labels, max_conf = data_encoder.decode(loc_preds[i], conf_preds[i], use_gpu)
                 print('boxes', boxes)
                 print('labels', labels)
