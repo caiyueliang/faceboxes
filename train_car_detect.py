@@ -53,6 +53,7 @@ def test(net, test_loader, show_info=False):
         if use_gpu:
             images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
 
+        print('images', images.size())
         loc_preds, conf_preds = net(images)
         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
         total_test_loss += loss.item()
