@@ -21,15 +21,15 @@ use_gpu = torch.cuda.is_available()
 
 re_train = False
 learning_rate = 0.0001
-num_epochs = 150
+num_epochs = 0
 decay_epoch = 60
-batch_size = 8
+batch_size = 1
 
 
 def show_img(img, boxes):
     print(img.size())
-    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
-    # img = cv2.cvtColor(np.asarray(img), cv2.COLOR_BGR2GRAY)
+    # img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2RGBA)
     h, w, c = img.shape
     print(h, w, c)
     for i in range(len(boxes)):
@@ -110,12 +110,12 @@ if __name__ == '__main__':
     transform_train = transforms.Compose([
         # transforms.Resize(self.img_size),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
+        # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
     ])
     transform_test = transforms.Compose([
         # T.Resize(self.img_size),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
+        # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
     ])
 
     train_dataset = ListDataset(root=train_root, list_file=train_label, train=True, transform=transform_train)
