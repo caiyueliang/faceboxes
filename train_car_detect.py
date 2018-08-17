@@ -20,10 +20,10 @@ from encoderl import DataEncoder
 use_gpu = torch.cuda.is_available()
 
 re_train = False
-learning_rate = 0.001
-num_epochs = 0
+learning_rate = 0.0001
+num_epochs = 150
 decay_epoch = 60
-batch_size = 16
+batch_size = 8
 
 
 def show_img(img, boxes):
@@ -53,7 +53,7 @@ def test(net, test_loader, show_info=False):
         if use_gpu:
             images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
 
-        print('images', images.size())
+        # print('images', images.size())
         loc_preds, conf_preds = net(images)
         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
         total_test_loss += loss.item()
@@ -86,7 +86,8 @@ if __name__ == '__main__':
     test_label = './label/car_detect_test_label.txt'
 
     common.mkdir_if_not_exist('./weight')
-    model_file = 'weight/car_detect.pt'                 # 保存的模型名称
+    # model_file = 'weight/car_detect.pt'                 # 保存的模型名称
+    model_file = 'weight/car_rough_detect.pt'
 
     best_loss = 10
 
@@ -175,7 +176,7 @@ if __name__ == '__main__':
             print('[saving best model] ...', best_model_file)
             torch.save(net.state_dict(), best_model_file)
 
-    print('[saving model] ...', model_file)
-    torch.save(net.state_dict(), model_file)
+    # print('[saving model] ...', model_file)
+    # torch.save(net.state_dict(), model_file)
 
     test(net, test_loader, show_info=True)
