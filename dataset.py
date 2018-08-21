@@ -63,11 +63,12 @@ class ListDataset(data.Dataset):
         boxes = self.boxes[idx].clone()
         labels = self.labels[idx].clone()
 
+        # 图片增广
         if self.train:
-            img, boxes, labels = self.random_crop(img, boxes, labels)
-            img = self.random_bright(img)
-            img, boxes = self.random_flip(img, boxes)
-            boxwh = boxes[:, 2:] - boxes[:, :2]
+            img, boxes, labels = self.random_crop(img, boxes, labels)       # 随机裁剪
+            img = self.random_bright(img)                                   # 随机调亮
+            img, boxes = self.random_flip(img, boxes)                       # 随机翻转
+            # boxwh = boxes[:, 2:] - boxes[:, :2]
             # print('boxwh', boxwh)
 
         h, w, _ = img.shape
@@ -82,6 +83,9 @@ class ListDataset(data.Dataset):
 
         return img, loc_target, conf_target
 
+    def __len__(self):
+        return self.num_samples
+
     def random_getim(self):
         idx = random.randrange(0,self.num_samples)
         fname = self.fnames[idx]
@@ -91,34 +95,35 @@ class ListDataset(data.Dataset):
 
         return img, boxes, labels
 
-    def __len__(self):
-        return self.num_samples
-
+    # 随机翻转
     def random_flip(self, im, boxes):
         if random.random() < 0.5:
             im_lr = np.fliplr(im).copy()
-            h,w,_ = im.shape
-            xmin = w - boxes[:,2]
-            xmax = w - boxes[:,0]
-            boxes[:,0] = xmin
-            boxes[:,2] = xmax
+            h, w, _ = im.shape
+            xmin = w - boxes[:, 2]
+            xmax = w - boxes[:, 0]
+            boxes[:, 0] = xmin
+            boxes[:, 2] = xmax
             return im_lr, boxes
         return im, boxes
 
+    # 随机裁剪
     def random_crop(self, im, boxes, labels):
+        print('random_crop', boxes, labels)
+
         imh, imw, _ = im.shape
         short_size = min(imw, imh)
         while True:
             mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
             if mode is None:
-                boxes_uniform = boxes / torch.Tensor([imw,imh,imw,imh]).expand_as(boxes)
-                boxwh = boxes_uniform[:,2:] - boxes_uniform[:,:2]
-                mask = (boxwh[:,0] > self.small_threshold) & (boxwh[:,1] > self.small_threshold)
+                boxes_uniform = boxes / torch.Tensor([imw, imh, imw, imh]).expand_as(boxes)
+                boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
+                mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
                 if not mask.any():
                     print('default image have none box bigger than small_threshold')
                     im, boxes, labels = self.random_getim()
                     imh, imw, _ = im.shape
-                    short_size = min(imw,imh)
+                    short_size = min(imw, imh)
                     continue
                 selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
                 selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
@@ -154,17 +159,18 @@ class ListDataset(data.Dataset):
                     print('crop image have none box bigger than small_threshold')
                     im, boxes, labels = self.random_getim()
                     imh, imw, _ = im.shape
-                    short_size = min(imw,imh)
+                    short_size = min(imw, imh)
                     continue
                 selected_boxes_selected = selected_boxes.index_select(0, mask.nonzero().squeeze(1))
                 selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
                 return img, selected_boxes_selected, selected_labels
 
+    # 随机调亮
     def random_bright(self, im, delta=16):
         alpha = random.random()
         if alpha > 0.3:
-            im = im * alpha + random.randrange(-delta,delta)
-            im = im.clip(min=0,max=255).astype(np.uint8)
+            im = im * alpha + random.randrange(-delta, delta)
+            im = im.clip(min=0, max=255).astype(np.uint8)
         return im
 
     def testGet(self, idx):
@@ -196,36 +202,36 @@ class ListDataset(data.Dataset):
         return img, boxes, labels
 
 
-if __name__ == '__main__':
-    file_root = '/home/lxg/codedata/aflw/'
-    train_dataset = ListDataset(root=file_root, list_file='box_label.txt', train=True, transform=[transforms.ToTensor()])
-    print('the dataset has %d image' % (len(train_dataset)))
-    for i in range(len(train_dataset)):
-        print(i)
-        item = random.randrange(0, len(train_dataset))
-        item = item
-        img, boxes, labels = train_dataset.testGet(item)
-        # img, boxes = train_dataset[item]
-        img = img.numpy().transpose(1, 2, 0).copy()*255
-        train_dataset.data_encoder.test_encode(boxes, img, labels)
-
-        boxes = boxes.numpy().tolist()
-        w, h, _ = img.shape
-        # print('img', img.shape)
-        # print('boxes', boxes.shape)
-
-        for box in boxes:
-            x1 = int(box[0]*w)
-            y1 = int(box[1]*h)
-            x2 = int(box[2]*w)
-            y2 = int(box[3]*h)
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255))
-            boxw = x2-x1
-            boxh = y2-y1
-            print(boxw,boxh, box)
-            if boxw is 0 or boxh is 0:
-                raise 'zero width'
-
-        cv2.imwrite('test'+str(i)+'.jpg', img)
-        if i == 0:
-            break
+# if __name__ == '__main__':
+#     file_root = '/home/lxg/codedata/aflw/'
+#     train_dataset = ListDataset(root=file_root, list_file='box_label.txt', train=True, transform=[transforms.ToTensor()])
+#     print('the dataset has %d image' % (len(train_dataset)))
+#     for i in range(len(train_dataset)):
+#         print(i)
+#         item = random.randrange(0, len(train_dataset))
+#         item = item
+#         img, boxes, labels = train_dataset.testGet(item)
+#         # img, boxes = train_dataset[item]
+#         img = img.numpy().transpose(1, 2, 0).copy()*255
+#         train_dataset.data_encoder.test_encode(boxes, img, labels)
+#
+#         boxes = boxes.numpy().tolist()
+#         w, h, _ = img.shape
+#         # print('img', img.shape)
+#         # print('boxes', boxes.shape)
+#
+#         for box in boxes:
+#             x1 = int(box[0]*w)
+#             y1 = int(box[1]*h)
+#             x2 = int(box[2]*w)
+#             y2 = int(box[3]*h)
+#             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255))
+#             boxw = x2-x1
+#             boxh = y2-y1
+#             print(boxw,boxh, box)
+#             if boxw is 0 or boxh is 0:
+#                 raise 'zero width'
+#
+#         cv2.imwrite('test'+str(i)+'.jpg', img)
+#         if i == 0:
+#             break
