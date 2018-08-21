@@ -67,7 +67,7 @@ class ListDataset(data.Dataset):
         if self.train:
             img, boxes, labels = self.random_crop(img, boxes, labels)       # 随机裁剪
             img = self.random_bright(img)                                   # 随机调亮
-            img, boxes = self.random_flip(img, boxes)                       # 随机翻转
+            # img, boxes = self.random_flip(img, boxes)                     # 随机翻转
             # boxwh = boxes[:, 2:] - boxes[:, :2]
             # print('boxwh', boxwh)
 
@@ -113,6 +113,7 @@ class ListDataset(data.Dataset):
 
         imh, imw, _ = im.shape
         short_size = min(imw, imh)
+        print(imh, imw, short_size)
         while True:
             mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
             if mode is None:
