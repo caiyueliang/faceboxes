@@ -58,6 +58,7 @@ class ListDataset(data.Dataset):
     def __getitem__(self, idx):
         fname = self.fnames[idx]
         img = cv2.imread(os.path.join(self.root + fname))
+        # print(os.path.join(self.root + fname))
         assert img is not None
 
         boxes = self.boxes[idx].clone()
@@ -109,11 +110,11 @@ class ListDataset(data.Dataset):
 
     # 随机裁剪
     def random_crop(self, im, boxes, labels):
-        print('random_crop', boxes, labels)
+        # print('random_crop', boxes, labels)
 
         imh, imw, _ = im.shape
         short_size = min(imw, imh)
-        print(imh, imw, short_size)
+        # print(imh, imw, short_size)
         while True:
             mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
             if mode is None:

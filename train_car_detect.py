@@ -20,10 +20,10 @@ from encoderl import DataEncoder
 use_gpu = torch.cuda.is_available()
 
 re_train = False
-learning_rate = 0.0001
-num_epochs = 0
+learning_rate = 0.001
+num_epochs = 200
 decay_epoch = 60
-batch_size = 1
+batch_size = 8
 
 
 def show_img(img, boxes):
@@ -81,9 +81,9 @@ def test(net, test_loader, show_info=False):
 
 if __name__ == '__main__':
     train_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_train/')
-    train_label = './label/car_detect_train_label.txt'
+    train_label = os.path.join(train_root, 'car_detect_train_label.txt')
     test_root = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
-    test_label = './label/car_detect_test_label.txt'
+    test_label = os.path.join(test_root, 'car_detect_test_label.txt')
 
     common.mkdir_if_not_exist('./weight')
     # model_file = 'weight/car_detect.pt'                 # 保存的模型名称
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     transform_test = transforms.Compose([
         # T.Resize(self.img_size),
         transforms.ToTensor(),
-        # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
+        # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
     ])
 
     train_dataset = ListDataset(root=train_root, list_file=train_label, train=True, transform=transform_train)
