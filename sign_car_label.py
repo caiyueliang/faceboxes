@@ -3,7 +3,7 @@ import cv2
 import os
 import time
 
-from common import common as common
+import common as common
 
 # ['EVENT_FLAG_ALTKEY', 'EVENT_FLAG_CTRLKEY', 'EVENT_FLAG_LBUTTON', 'EVENT_FLAG_MBUTTON', 'EVENT_FLAG_RBUTTON',
 # 'EVENT_FLAG_SHIFTKEY', 'EVENT_LBUTTONDBLCLK', 'EVENT_LBUTTONDOWN', 'EVENT_LBUTTONUP', 'EVENT_MBUTTONDBLCLK',
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     # image_dir = "special_1"
     # image_dir = "other_1"
     # image_dir = "daozha_3"
-    image_dir = "szlg_1"
+    image_dir = "failed_1"
 
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
