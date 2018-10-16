@@ -80,7 +80,7 @@ class FilterImage:
                 if k == ord('y'):
                     print('copy image ...')
                     # shutil.move(self.img_files_2[start_i], self.output_dir)
-                    shutil.copy(self.old_img, self.output_dir)
+                    shutil.copy(old_img, self.output_dir)
                     start_i += 1
                     common.write_data(self.index_file, str(start_i), 'w')
                     break
@@ -95,12 +95,13 @@ class FilterImage:
 if __name__ == '__main__':
     # image_dir_1 = "../capture_image/province_nosign/failed_recognize/"
     # image_dir_2 = "../capture_image/province_nosign/failed_recognize_routh/"
+    # image_dir_1 = "../capture_image/province_nosign/failed_detect/"
+    # image_dir_2 = "../capture_image/province_nosign/failed_detect_routh/"
 
-    image_dir_1 = "../capture_image/province_nosign/failed_detect/"
-    image_dir_2 = "../capture_image/province_nosign/failed_detect_routh/"
-
-    image_dir_1 = "../capture_image/province_nosign/failed_detect/"
-    image_dir_2 = "../capture_image/province_nosign/failed_detect_routh/"
+    image_dir_1 = "../capture_image/all_99.6926_nosign/failed_recognize/"
+    image_dir_2 = "../capture_image/all_99.6926_nosign/failed_recognize_routh/"
+    # image_dir_1 = "../capture_image/all_99.6926_nosign/failed_detect/"
+    # image_dir_2 = "../capture_image/all_99.6926_nosign/failed_detect_routh/"
 
     output_dir = "./Data/"
 
