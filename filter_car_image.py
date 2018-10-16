@@ -44,7 +44,7 @@ class FilterImage:
     #             print('self.car_points is too long, %s' % str(self.car_points))
 
     def filter_start(self, restart=False):
-        times = 2
+        times = 1
         start_i = 0
 
         if restart is False:
@@ -58,15 +58,22 @@ class FilterImage:
             start_i = 0
 
         while start_i < len(self.img_files_1):
-            print('[total] %d; [index] %d; [name] %s' % (len(self.img_files_1), start_i, self.img_files_1[start_i]))
+            old_img = self.img_files_1[start_i]
 
-            img_1 = cv2.imread(self.img_files_1[start_i])
-            img_1 = cv2.resize(img_1, (img_1.shape[0]*times, img_1.shape[1]*times))
-            cv2.imshow('image_1', img_1)
+            print('[total] %d; [index] %d; [name] %s' % (len(self.img_files_1), start_i, old_img))
 
-            img_2 = cv2.imread(self.img_files_2[start_i])
-            img_2 = cv2.resize(img_2, (img_2.shape[0]*times, img_2.shape[1]*times))
-            cv2.imshow('image_2', img_2)
+            img_1 = cv2.imread(old_img)
+            img_1 = cv2.resize(img_1, (img_1.shape[1], img_1.shape[0]))
+            cv2.imshow('old_image', img_1)
+
+            img_id = old_img.split(os.sep)[-1].split('_')[0]
+            found_imgs = [img_path for img_path in self.img_files_2 if img_id + "_" in img_path]
+            print(found_imgs)
+
+            for i, img_path in enumerate(found_imgs):
+                img_2 = cv2.imread(img_path)
+                img_2 = cv2.resize(img_2, (img_2.shape[1]*times, img_2.shape[0]*times))
+                cv2.imshow('image_' + str(i), img_2)
 
             while True:
                 k = cv2.waitKey(1) & 0xFF
@@ -83,77 +90,7 @@ class FilterImage:
                     common.write_data(self.index_file, str(start_i), 'w')
                     break
 
-    # def sign_start(self, restart=False):
-    #     times = 2
-    #
-    #     cv2.namedWindow('sign_image')
-    #     cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
-    #
-    #     if restart is False:
-    #         try:
-    #             start_i = int(common.read_data(self.index_file, 'r'))
-    #             print('start_index: ' + str(start_i))
-    #         except Exception, e:
-    #             print e
-    #             start_i = 0
-    #     else:
-    #         start_i = 0
-    #
-    #     # for img_file in self.img_files:
-    #     while start_i < len(self.img_files):
-    #         print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
-    #
-    #         self.img = cv2.imread(self.img_files[start_i])
-    #         self.img = cv2.resize(self.img, (self.img.shape[0]*times, self.img.shape[1]*times))
-    #         cv2.imshow('sign_image', self.img)
-    #
-    #         while True:
-    #             cv2.imshow('sign_image', self.img)
-    #
-    #             # 保存这张图片
-    #             k = cv2.waitKey(1) & 0xFF
-    #             if k == ord('s'):
-    #                 print('save ...')
-    #                 data = self.img_files[start_i] + " " + str(len(self.car_points))
-    #                 for (x, y) in self.car_points:
-    #                     data += ' ' + str(x/float(times)) + ' ' + str(y/float(times))
-    #                 data += '\n'
-    #
-    #                 common.write_data(self.label_file, data, 'a+')
-    #                 start_i += 1
-    #                 common.write_data(self.index_file, str(start_i), 'w')
-    #                 self.car_points = []
-    #                 break
-    #
-    #             if k == ord('d'):
-    #                 print('delete ...')
-    #                 common.exe_cmd('rm -r ' + self.img_files[start_i])
-    #                 self.img_files.pop(start_i)
-    #
-    #                 self.img = cv2.imread(self.img_files[start_i])
-    #                 self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
-    #                 cv2.imshow('sign_image', self.img)
-    #                 self.car_points = []
-    #
-    #             # 重新加载图片
-    #             if k == ord('r'):
-    #                 print('re sign ...')
-    #                 self.img = cv2.imread(self.img_files[start_i])
-    #                 self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
-    #                 cv2.imshow('sign_image', self.img)
-    #                 self.car_points = []
-    #
-    #             if k == ord('c'):
-    #                 print('change size ...')
-    #                 if times == 2:
-    #                     times = 4
-    #                 else:
-    #                     times = 2
-    #                 self.img = cv2.imread(self.img_files[start_i])
-    #                 self.img = cv2.resize(self.img, (self.img.shape[0] * times, self.img.shape[1] * times))
-    #                 cv2.imshow('sign_image', self.img)
-    #                 self.car_points = []
-
+            # cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     image_dir_1 = "../capture_image/province_nosign/failed_recognize/"
