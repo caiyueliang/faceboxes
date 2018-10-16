@@ -156,7 +156,7 @@ class FilterImage:
 
 
 if __name__ == '__main__':
-    image_dir_1 = "../capture_image/province_sign/failed_recognize_routh/"
+    image_dir_1 = "../capture_image/province_nosign/failed_recognize/"
     image_dir_2 = "../capture_image/province_nosign/failed_recognize_routh/"
     output_dir = "./Data/"
 
