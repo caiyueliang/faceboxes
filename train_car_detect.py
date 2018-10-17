@@ -10,7 +10,7 @@ from torch.autograd import Variable
 from networks import FaceBox
 from multibox_loss import MultiBoxLoss
 from dataset import ListDataset
-from common import common
+import common
 import visdom
 import cv2
 import numpy as np
