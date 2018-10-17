@@ -23,7 +23,7 @@ re_train = False
 learning_rate = 0.001
 num_epochs = 200
 decay_epoch = 60
-batch_size = 8
+batch_size = 32
 
 
 def show_img(img, boxes):
