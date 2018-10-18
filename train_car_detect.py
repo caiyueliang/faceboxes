@@ -23,7 +23,7 @@ re_train = False
 learning_rate = 0.001
 num_epochs = 200
 decay_epoch = 60
-batch_size = 32
+batch_size = 16
 
 
 def show_img(img, boxes):
@@ -67,9 +67,9 @@ def test(net, test_loader, show_info=False):
                 # print('2 pre_label', loc_preds[i].size(), conf_preds[i].size())
                 # print('3 pre_label', loc_preds[i], conf_preds[i])
                 boxes, labels, max_conf = data_encoder.decode(loc_preds[i], conf_preds[i], use_gpu)
-                print('boxes', boxes)
-                print('labels', labels)
-                print('max_conf', max_conf)
+                # print('boxes', boxes)
+                # print('labels', labels)
+                # print('max_conf', max_conf)
 
                 show_img(images[i].permute(1, 2, 0), boxes.cpu().detach().numpy())
                 # show_img(images[i], boxes.cpu().detach().numpy())
