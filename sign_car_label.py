@@ -127,23 +127,37 @@ class SignCarLabel:
                     cv2.imshow('sign_image', self.img)
                     self.car_points = []
 
+    def clean_start(self, root_dir, label_path, restart=False):
+        with open(label_path, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                str_list = line.split(' ')
+                image_path = os.path.join(root_dir, str_list[0])
+                img = cv2.imread(image_path)
+                while True:
+                    cv2.imshow('clean_image', img)
+
+                    k = cv2.waitKey(1) & 0xFF
+                    if k == ord('y'):
+                        print('save ...')
+                        common.write_data(os.path.join('.', label_path.split('/')[-1]), line, 'a+')
+                        break
+                    if k == ord('n'):
+                        break
+        return
+
 
 if __name__ == '__main__':
     root_dir = '../Data/car_rough_detect/car_detect_train/'
-    # root_dir = '../Data/car_rough_detect/car_detect_test/'
-
-    # image_dir = "ketuo_1"
-    # image_dir = "daozha_1"
-    # image_dir = "daozha_2"
-    # image_dir = "special_1"
-    # image_dir = "other_1"
-    # image_dir = "daozha_3"
     image_dir = "failed_1"
-
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
     sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
 
-    print label_file
-    print index_file
-    sign_point.sign_start()
+    # sign_point.sign_start()
+
+    root_dir = '../Data/car_rough_detect/car_detect_train/'
+    label_path = '../Data/car_rough_detect/car_detect_train/car_detect_train_label.txt'
+    # root_dir = '../Data/car_rough_detect/car_detect_test/'
+    # label_path = '../Data/car_rough_detect/car_detect_test/car_detect_test_label.txt'
+    sign_point.clean_start(root_dir, label_path)

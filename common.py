@@ -35,6 +35,7 @@ def get_img_files(file_dir):
                 L.append(os.path.join(root, file))      # os.path.join 获取完整路径
     return L
 
+
 # 写数据 flag:'w+'
 def write_data(file_name, data, flag):
     with open(file_name, flag) as f:
@@ -42,7 +43,7 @@ def write_data(file_name, data, flag):
 
 
 # 读数据 flag:'r'
-def read_data(file_name, flag):
+def read_data(file_name, flag='r'):
     with open(file_name, flag) as f:
         return f.read()
 
