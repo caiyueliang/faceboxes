@@ -98,9 +98,14 @@ class ModuleTrain:
         # self.model.train()
         for epoch_i in range(epoch):
             train_loss = 0.0
-            if epoch_i >= decay_epoch and epoch_i % decay_epoch == 0:                   # 减小学习速率
-                self.lr = self.lr * 0.1
-                self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=1e-4)
+            if epoch_i >= decay_epoch and epoch_i % decay_epoch == 0:
+                self.lr *= 0.1
+            for param_group in self.optimizer.param_groups:
+                param_group['lr'] = self.lr
+
+            # if epoch_i >= decay_epoch and epoch_i % decay_epoch == 0:                   # 减小学习速率
+            #     self.lr = self.lr * 0.1
+            #     self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=1e-4)
 
             print('================================================')
             for i, (images, loc_targets, conf_targets) in enumerate(self.train_loader):
