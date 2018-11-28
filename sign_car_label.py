@@ -149,15 +149,15 @@ class SignCarLabel:
 
 if __name__ == '__main__':
     root_dir = '../Data/car_rough_detect/car_detect_train/'
-    image_dir = "failed_1"
+    image_dir = "failed_2"
     label_file = "./label/car_label.txt"
     index_file = "./label/car_index.txt"
     sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
 
-    # sign_point.sign_start()
+    sign_point.sign_start()
 
-    root_dir = '../Data/car_rough_detect/car_detect_train/'
-    label_path = '../Data/car_rough_detect/car_detect_train/car_detect_train_label.txt'
+    # root_dir = '../Data/car_rough_detect/car_detect_train/'
+    # label_path = '../Data/car_rough_detect/car_detect_train/car_detect_train_label.txt'
     # root_dir = '../Data/car_rough_detect/car_detect_test/'
     # label_path = '../Data/car_rough_detect/car_detect_test/car_detect_test_label.txt'
-    sign_point.clean_start(root_dir, label_path)
+    # sign_point.clean_start(root_dir, label_path)
