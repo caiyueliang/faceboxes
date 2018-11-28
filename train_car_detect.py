@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # model_file = 'weight/car_detect.pt'                 # 保存的模型名称
     model_file = 'weight/car_rough_detect.pt'
 
-    best_loss = 10
+    best_loss = 0.1
 
     net = FaceBox()
     if use_gpu:
@@ -160,7 +160,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
-        print ('Epoch [%d/%d] average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader.dataset)))
+        print ('Epoch [%d/%d] average_loss: %.6f' % (epoch + 1, num_epochs, total_loss / len(train_loader.dataset)))
         # num_iter = num_iter + 1
         # vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
 
@@ -179,8 +179,5 @@ if __name__ == '__main__':
                     best_model_file += '.'
             print('[saving best model] ...', best_model_file)
             torch.save(net.state_dict(), best_model_file)
-
-    # print('[saving model] ...', model_file)
-    # torch.save(net.state_dict(), model_file)
 
     test(net, test_loader, show_info=True)
