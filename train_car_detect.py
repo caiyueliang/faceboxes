@@ -11,10 +11,11 @@ from networks import FaceBox
 from multibox_loss import MultiBoxLoss
 from dataset import ListDataset
 import common
-import visdom
+# import visdom
 import cv2
 import numpy as np
 from encoderl import DataEncoder
+import time
 
 
 use_gpu = torch.cuda.is_available()
@@ -23,7 +24,7 @@ re_train = False
 learning_rate = 0.001
 num_epochs = 200
 decay_epoch = 60
-batch_size = 16
+batch_size = 32
 
 
 def show_img(img, boxes):
@@ -45,6 +46,7 @@ def test(net, test_loader, show_info=False):
     total_test_loss = 0
     data_encoder = DataEncoder()
 
+    time_start = time.time()
     # 测试集
     # for data, target in test_loader:
     for images, loc_targets, conf_targets in test_loader:
@@ -74,8 +76,10 @@ def test(net, test_loader, show_info=False):
                 show_img(images[i].permute(1, 2, 0), boxes.cpu().detach().numpy())
                 # show_img(images[i], boxes.cpu().detach().numpy())
 
-    avg_loss = total_test_loss / len(test_loader)
-    print('[Test] avg_loss: {:.4f}\n'.format(avg_loss))
+    time_end = time.time()
+    time_avg = float(time_end - time_start) / float(len(test_loader.dataset))
+    avg_loss = total_test_loss / len(test_loader.dataset)
+    print('[Test] avg_loss: {:.6f} time: {:.6f}\n'.format(avg_loss, time_avg))
     return avg_loss
 
 
@@ -123,13 +127,13 @@ if __name__ == '__main__':
     test_dataset = ListDataset(root=test_root, list_file=test_label, train=False, transform=transform_test)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
-    print('the dataset has %d images' % (len(train_dataset)))
+    print('the dataset has %d images' % (len(train_loader.dataset)))
     print('the batch_size is %d' % batch_size)
 
     # 可视化工具
-    num_iter = 0
-    vis = visdom.Visdom()
-    win = vis.line(Y=np.array([0]), X=np.array([0]))
+    # num_iter = 0
+    # vis = visdom.Visdom()
+    # win = vis.line(Y=np.array([0]), X=np.array([0]))
 
     net.train()
     for epoch in range(num_epochs):
@@ -156,9 +160,9 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
 
-        print ('Epoch [%d/%d] average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader)))
-        num_iter = num_iter + 1
-        vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
+        print ('Epoch [%d/%d] average_loss: %.4f' % (epoch + 1, num_epochs, total_loss / len(train_loader.dataset)))
+        # num_iter = num_iter + 1
+        # vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
 
         test_loss = test(net, test_loader)
 
