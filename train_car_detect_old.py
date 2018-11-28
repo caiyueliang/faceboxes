@@ -182,4 +182,4 @@ if __name__ == '__main__':
     # print('[saving model] ...', model_file)
     # torch.save(net.state_dict(), model_file)
 
-    test(net, test_loader, show_info=True)
+    test(net, test_loader, show_info=False)
