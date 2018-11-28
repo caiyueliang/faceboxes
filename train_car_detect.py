@@ -123,7 +123,7 @@ class ModuleTrain:
                 loss.backward()
                 self.optimizer.step()
 
-            train_loss /= len(self.train_loader.dataset)
+            train_loss /= len(self.train_loader)
             print ('[Train] Epoch [%d/%d] average_loss: %.6f lr: %.6f' % (epoch_i + 1, epoch, train_loss, self.lr))
 
             test_loss = self.test()
@@ -143,7 +143,7 @@ class ModuleTrain:
         self.save(self.model_file)
 
     def test(self, show_info=False):
-        total_test_loss = 0
+        test_loss = 0
         data_encoder = DataEncoder()
 
         time_start = time.time()
@@ -158,7 +158,7 @@ class ModuleTrain:
             # print('images', images.size())
             loc_preds, conf_preds = self.model(images)
             loss = self.criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
-            total_test_loss += loss.item()
+            test_loss += loss.item()
 
             if show_info is True:
                 # print('0 pre_label', loc_preds.size(), conf_preds.size())
@@ -178,7 +178,7 @@ class ModuleTrain:
 
         time_end = time.time()
         time_avg = float(time_end - time_start) / float(len(self.test_loader.dataset))
-        avg_loss = total_test_loss / len(self.test_loader.dataset)
+        avg_loss = test_loss / len(self.test_loader)
         print('[Test] avg_loss: {:.6f} time: {:.6f}\n'.format(avg_loss, time_avg))
         return avg_loss
 
