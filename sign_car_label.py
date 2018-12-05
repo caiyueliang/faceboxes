@@ -2,7 +2,7 @@
 import cv2
 import os
 import time
-
+import shutil
 import common as common
 
 # ['EVENT_FLAG_ALTKEY', 'EVENT_FLAG_CTRLKEY', 'EVENT_FLAG_LBUTTON', 'EVENT_FLAG_MBUTTON', 'EVENT_FLAG_RBUTTON',
@@ -21,12 +21,14 @@ import common as common
 
 
 class SignCarLabel:
-    def __init__(self, root_dir, image_dir, label_file, index_file):
+    def __init__(self, root_dir, image_dir, label_file, index_file, copy_dir, copy_file):
         self.img_files = common.get_files(os.path.join(root_dir, image_dir))
         self.image_dir = image_dir
         self.label_file = label_file
         self.car_points = []
         self.index_file = index_file
+        self.copy_dir = copy_dir
+        self.copy_file = copy_file
 
         print("[len] ", len(self.img_files))
         return
@@ -43,6 +45,8 @@ class SignCarLabel:
 
     def sign_start(self, restart=False):
         times = 1
+
+        common.mkdir_if_not_exist(os.path.join(self.copy_dir, self.image_dir))
 
         cv2.namedWindow('sign_image')
         cv2.setMouseCallback('sign_image', self.mouse_click_events)    # 鼠标事件绑定
@@ -72,7 +76,7 @@ class SignCarLabel:
 
                 # 保存这张图片
                 k = cv2.waitKey(1) & 0xFF
-                if k == ord('s'):
+                if k == ord('s') or k == ord('1'):
                     print('save ...')
                     data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
                     for i in range(len(self.car_points) / 2):
@@ -92,11 +96,34 @@ class SignCarLabel:
                     self.car_points = []
                     break
 
+                if k == ord('2'):
+                    print('save and copy ...')
+                    data = self.img_files[start_i] + " " + str(len(self.car_points) / 2)
+                    for i in range(len(self.car_points) / 2):
+                        data += ' ' + str(self.car_points[2 * i][0] / float(times)) + \
+                                ' ' + str(self.car_points[2 * i][1] / float(times)) + \
+                                ' ' + str((self.car_points[2 * i + 1][0] - self.car_points[2 * i][0]) / float(times)) + \
+                                ' ' + str((self.car_points[2 * i + 1][1] - self.car_points[2 * i][1]) / float(times)) + \
+                                ' 1'
+
+                    data += '\n'
+
+                    common.write_data(self.label_file, data, 'a+')
+                    common.write_data(self.copy_file, data, 'a+')
+                    shutil.copy(self.img_files[start_i], os.path.join(self.copy_dir, self.image_dir,
+                                                                      self.img_files[start_i].split('/')[-1]))
+
+                    start_i += 1
+                    common.write_data(self.index_file, str(start_i), 'w')
+                    self.car_points = []
+                    break
+
                 if k == ord('d'):
                     print('delete ...')
                     common.exe_cmd('rm -r ' + self.img_files[start_i])
                     self.img_files.pop(start_i)
 
+                    print('[total] %d; [index] %d; [name] %s' % (len(self.img_files), start_i, self.img_files[start_i]))
                     self.img = cv2.imread(self.img_files[start_i])
                     print(self.img.shape)
                     self.img = cv2.resize(self.img, (self.img.shape[1]*times, self.img.shape[0] * times))
@@ -149,10 +176,14 @@ class SignCarLabel:
 
 if __name__ == '__main__':
     root_dir = '../Data/car_rough_detect/car_detect_train/'
-    image_dir = "failed_2"
+    copy_dir = '../Data/car_rough_detect/car_detect_test/'
+    image_dir = "failed_3"
     label_file = "./label/car_label.txt"
+    copy_file = "./label/copy_label.txt"
     index_file = "./label/car_index.txt"
-    sign_point = SignCarLabel(root_dir, image_dir, label_file, index_file)
+
+    sign_point = SignCarLabel(root_dir=root_dir, image_dir=image_dir, label_file=label_file,
+                              index_file=index_file, copy_dir=copy_dir, copy_file=copy_file)
 
     sign_point.sign_start()
 
