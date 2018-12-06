@@ -223,7 +223,7 @@ if __name__ == '__main__':
     # batch_size = 20
     # lr = 0.001
     # img_size = 1024
-    
+
     model = FaceBox()
     model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path, model_file=args.output_model_path,
                               model=model, batch_size=args.batch_size, img_size=args.img_size,
