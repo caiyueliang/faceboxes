@@ -2,7 +2,6 @@
 import os
 import torch
 from torch.utils.data import DataLoader
-from torchvision import models
 from torch.autograd import Variable
 import torch.optim as optim
 import torch.nn.functional as F
@@ -15,6 +14,7 @@ import cv2
 import numpy as np
 from encoderl import DataEncoder
 import time
+from argparse import ArgumentParser
 
 
 def show_img(img, boxes):
@@ -34,7 +34,7 @@ def show_img(img, boxes):
 
 class ModuleTrain:
     def __init__(self, train_path, test_path, model_file, model, img_size=1024, batch_size=16, lr=1e-3,
-                 re_train=False, best_loss=0.2, use_gpu=False):
+                 re_train=False, best_loss=2, use_gpu=False):
         self.train_path = train_path
         self.test_path = test_path
         self.model_file = model_file
@@ -193,109 +193,42 @@ class ModuleTrain:
         # self.model.save(name)
 
 
+def parse_argvs():
+    parser = ArgumentParser(description='car_classifier')
+    parser.add_argument('--train_path', type=str, help='train dataset path',
+                        default='~/deeplearning/Data/car_rough_detect/car_detect_train/')
+    parser.add_argument('--test_path', type=str, help='test dataset path',
+                        default='~/deeplearning/Data/car_rough_detect/car_detect_test/')
+
+    parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')
+    parser.add_argument('--batch_size', type=int, help='batch size', default=20)
+    parser.add_argument('--img_size', type=int, help='img size', default=1024)
+    parser.add_argument('--lr', type=float, help='learning rate', default=0.01)
+    parser.add_argument('--cuda', type=bool, help='use gpu', default=True)
+
+    input_args = parser.parse_args()
+    print(input_args)
+    return input_args
+
+
 if __name__ == '__main__':
-    train_path = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_train/')
-    test_path = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
+    args = parse_argvs()
 
-    common.mkdir_if_not_exist('./weight')
-    output_model_path = 'weight/car_rough_detect.pt'
+    # train_path = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_train/')
+    # test_path = os.path.expanduser('~/deeplearning/Data/car_rough_detect/car_detect_test/')
 
-    batch_size = 16
-    lr = 0.001
-    img_size = 1024
+    # common.mkdir_if_not_exist('./weight')
+    # output_model_path = 'weight/car_rough_detect.pt'
+
+    # batch_size = 20
+    # lr = 0.001
+    # img_size = 1024
+    
     model = FaceBox()
-    model_train = ModuleTrain(train_path=train_path, test_path=test_path, model_file=output_model_path,
-                              model=model, batch_size=batch_size, img_size=img_size, lr=lr, use_gpu=True)
+    model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path, model_file=args.output_model_path,
+                              model=model, batch_size=args.batch_size, img_size=args.img_size,
+                              lr=args.lr, use_gpu=args.cuda)
 
     model_train.train(200, 80)
     # model_train.test(show_img=True)
 
-    # ================================================================================================
-    # best_loss = 0.1
-
-    # net = FaceBox()
-    # if use_gpu:
-    #     print('[use gpu] ...')
-    #     net.cuda()
-    #
-    # # 加载模型
-    # if os.path.exists(model_file) and not re_train:
-    #     print('[load model] ...', model_file)
-    #     net.load_state_dict(torch.load(model_file))
-
-    # criterion = MultiBoxLoss()
-
-    # optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=0.0003)
-    # optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
-
-    # # RandomHorizontalFlip
-    # transform_train = T.Compose([
-    #     # transforms.Resize(self.img_size),
-    #     T.ToTensor(),
-    #     # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
-    # ])
-    # transform_test = T.Compose([
-    #     # T.Resize(self.img_size),
-    #     T.ToTensor(),
-    #     # transforms.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
-    # ])
-
-    # train_dataset = ListDataset(root=train_root, list_file=train_label, train=True, transform=transform_train)
-    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
-    # test_dataset = ListDataset(root=test_root, list_file=test_label, train=False, transform=transform_test)
-    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
-
-    # print('the dataset has %d images' % (len(train_loader.dataset)))
-    # print('the batch_size is %d' % batch_size)
-
-    # 可视化工具
-    # num_iter = 0
-    # vis = visdom.Visdom()
-    # win = vis.line(Y=np.array([0]), X=np.array([0]))
-
-    # net.train()
-    # for epoch in range(num_epochs):
-    #     if epoch >= decay_epoch and epoch % decay_epoch == 0:
-    #         learning_rate *= 0.1
-    #     for param_group in optimizer.param_groups:
-    #         param_group['lr'] = learning_rate
-    #
-    #     print('\nEpoch [%d/%d] learning_rate:%f' % (epoch + 1, num_epochs, learning_rate))
-    #     total_loss = 0.
-    #
-    #     for i, (images, loc_targets, conf_targets) in enumerate(train_loader):
-    #         images = Variable(images)
-    #         loc_targets = Variable(loc_targets)
-    #         conf_targets = Variable(conf_targets)
-    #         if use_gpu:
-    #             images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
-    #
-    #         loc_preds, conf_preds = net(images)
-    #         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)          # 计算损失
-    #         total_loss += loss.item()
-    #
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #     print ('Epoch [%d/%d] average_loss: %.6f' % (epoch + 1, num_epochs, total_loss / len(train_loader.dataset)))
-    #     # num_iter = num_iter + 1
-    #     # vis.line(Y=np.array([total_loss / len(train_loader)]), X=np.array([num_iter]), win=win, update='append')
-    #
-    #     test_loss = test(net, test_loader)
-    #
-    #     # 保存最好的模型
-    #     if best_loss > test_loss:
-    #         best_loss = test_loss
-    #         str_list = model_file.split('.')
-    #         best_model_file = ""
-    #         for str_index in range(len(str_list)):
-    #             best_model_file = best_model_file + str_list[str_index]
-    #             if str_index == (len(str_list) - 2):
-    #                 best_model_file += '_best'
-    #             if str_index != (len(str_list) - 1):
-    #                 best_model_file += '.'
-    #         print('[saving best model] ...', best_model_file)
-    #         torch.save(net.state_dict(), best_model_file)
-
-    # test(net, test_loader, show_info=False)
