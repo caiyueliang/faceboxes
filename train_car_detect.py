@@ -196,9 +196,9 @@ class ModuleTrain:
 def parse_argvs():
     parser = ArgumentParser(description='car_classifier')
     parser.add_argument('--train_path', type=str, help='train dataset path',
-                        default='~/deeplearning/Data/car_rough_detect/car_detect_train/')
+                        default='../Data/car_rough_detect/car_detect_train/')
     parser.add_argument('--test_path', type=str, help='test dataset path',
-                        default='~/deeplearning/Data/car_rough_detect/car_detect_test/')
+                        default='../Data/car_rough_detect/car_detect_test/')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')
     parser.add_argument('--batch_size', type=int, help='batch size', default=20)
