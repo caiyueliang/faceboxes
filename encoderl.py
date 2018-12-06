@@ -244,7 +244,7 @@ class DataEncoder:
             order = order[ids+1]
         return torch.LongTensor(keep)
 
-    def decode(self, loc, conf, use_gpu):
+    def decode(self, loc, conf, use_gpu, nms_threshold=0.5):
         '''
         將预测出的 loc/conf转换成真实的人脸框
         loc [21842, 4]
@@ -277,7 +277,7 @@ class DataEncoder:
         # print('ids', ids)
         # print('boxes', boxes.size(), boxes[ids])
 
-        keep = self.nms(boxes[ids], max_conf[ids])#.squeeze(1))
+        keep = self.nms(boxes[ids], max_conf[ids], nms_threshold)#.squeeze(1))
 
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
 

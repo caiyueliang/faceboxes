@@ -34,7 +34,7 @@ def show_img(img, boxes):
 
 class ModuleTrain:
     def __init__(self, train_path, test_path, model_file, model, img_size=1024, batch_size=16, lr=1e-3,
-                 re_train=False, best_loss=2, use_gpu=False):
+                 re_train=False, best_loss=2, use_gpu=False, nms_threshold=0.5):
         self.train_path = train_path
         self.test_path = test_path
         self.model_file = model_file
@@ -43,6 +43,7 @@ class ModuleTrain:
         self.re_train = re_train                        # 不加载训练模型，重新进行训练
         self.best_loss = best_loss                      # 最好的损失值，小于这个值，才会保存模型
         self.use_gpu = False
+        self.nms_threshold = nms_threshold
 
         if use_gpu is True:
             print("gpu available: %s" % str(torch.cuda.is_available()))
@@ -168,7 +169,7 @@ class ModuleTrain:
                 for i in range(len(loc_preds)):
                     # print('2 pre_label', loc_preds[i].size(), conf_preds[i].size())
                     # print('3 pre_label', loc_preds[i], conf_preds[i])
-                    boxes, labels, max_conf = data_encoder.decode(loc_preds[i], conf_preds[i], self.use_gpu)
+                    boxes, labels, max_conf = data_encoder.decode(loc_preds[i], conf_preds[i], self.use_gpu, self.nms_threshold)
                     # print('boxes', boxes)
                     # print('labels', labels)
                     # print('max_conf', max_conf)
@@ -201,9 +202,10 @@ def parse_argvs():
                         default='../Data/car_rough_detect/car_detect_test/')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')
-    parser.add_argument('--batch_size', type=int, help='batch size', default=20)
+    parser.add_argument('--batch_size', type=int, help='batch size', default=16)
     parser.add_argument('--img_size', type=int, help='img size', default=1024)
-    parser.add_argument('--lr', type=float, help='learning rate', default=0.01)
+    parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
+    parser.add_argument('--nms_threshold', type=float, help='learning rate', default=0.0)
     parser.add_argument('--cuda', type=bool, help='use gpu', default=True)
 
     input_args = parser.parse_args()
@@ -227,8 +229,8 @@ if __name__ == '__main__':
     model = FaceBox()
     model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path, model_file=args.output_model_path,
                               model=model, batch_size=args.batch_size, img_size=args.img_size,
-                              lr=args.lr, use_gpu=args.cuda)
+                              lr=args.lr, use_gpu=args.cuda, nms_threshold=args.nms_threshold)
 
-    model_train.train(200, 80)
-    # model_train.test(show_img=True)
+    model_train.train(300, 80)
+    # model_train.test(show_info=True)
 
