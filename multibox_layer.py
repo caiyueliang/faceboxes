@@ -34,25 +34,25 @@ class MultiBoxLayer(nn.Module):
         y_confs = []
         for i, x in enumerate(xs):
             y_loc = self.loc_layers[i](x)
-            print('loc MultiBoxLayer_Conv2d', y_loc.size())         # (-1, 84, 32, 32) (-1, 4, 16, 16) (-1, 4, 8, 8)
+            # print('loc MultiBoxLayer_Conv2d', y_loc.size())       # (-1, 84, 32, 32) (-1, 4, 16, 16) (-1, 4, 8, 8)
             N = y_loc.size(0)                                       # N为维度，类似通道数c
-            print('N', N)                                           # (-1)
+            # print('N', N)                                         # (-1)
             y_loc = y_loc.permute(0, 2, 3, 1).contiguous()          # permute 置换|转置
-            print('loc MultiBoxLayer_permute', y_loc.size())        # (-1, 32, 32, 84) (-1, 16, 16, 4) (-1, 8, 8, 4)
+            # print('loc MultiBoxLayer_permute', y_loc.size())      # (-1, 32, 32, 84) (-1, 16, 16, 4) (-1, 8, 8, 4)
             y_loc = y_loc.view(N, -1, 4)                            # 减少一个维度
-            print('loc MultiBoxLayer_view', y_loc.size())           # (-1, 21504, 4)   (-1, 256, 4)    (-1, 64, 4)
+            # print('loc MultiBoxLayer_view', y_loc.size())         # (-1, 21504, 4)   (-1, 256, 4)    (-1, 64, 4)
             y_locs.append(y_loc)
 
-            y_conf = self.conf_layers[i](x)                         # (-1, 42, 32, 32) (-1, 4, 8, 8)   (-1, 2, 8, 8)
-            print('y_conf MultiBoxLayer_y_conf', y_conf.size())
+            y_conf = self.conf_layers[i](x)
+            # print('y_conf MultiBoxLayer_y_conf', y_conf.size())   # (-1, 42, 32, 32) (-1, 4, 8, 8)   (-1, 2, 8, 8)
             y_conf = y_conf.permute(0, 2, 3, 1).contiguous()
-            print('y_conf MultiBoxLayer_permute', y_conf.size())    # (-1, 32, 32, 42) (-1, 8, 8, 4)   (-1, 8, 8, 2)
+            # print('y_conf MultiBoxLayer_permute', y_conf.size())  # (-1, 32, 32, 42) (-1, 8, 8, 4)   (-1, 8, 8, 2)
             y_conf = y_conf.view(N, -1, 2)
-            print('y_conf MultiBoxLayer_view', y_conf.size())       # (-1, 21504, 2)   (-1, 64, 4)     (-1, 64, 2)
+            # print('y_conf MultiBoxLayer_view', y_conf.size())     # (-1, 21504, 2)   (-1, 64, 4)     (-1, 64, 2)
             y_confs.append(y_conf)
 
-            print('y_locs', len(y_locs))
-            print('y_confs', len(y_confs))
+            # print('y_locs', len(y_locs))
+            # print('y_confs', len(y_confs))
 
         loc_preds = torch.cat(y_locs, 1)                            # (-1, 21824, 4)   21504+256+64=21824
         conf_preds = torch.cat(y_confs, 1)                          # (-1, 21824, 2)   21504+256+64=21824
@@ -70,14 +70,8 @@ def multi_box_layer_test():
 
     multilbox = MultiBoxLayer()
 
-    # print hs
-
-    # for i in hs:
-    #     print('input: ', hs[i].size())
-
     loc_preds, conf_preds = multilbox(hs)
     print('output: ', loc_preds.size(), conf_preds.size())
-    # print(output)
 
 
 if __name__ == '__main__':
