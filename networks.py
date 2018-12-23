@@ -72,9 +72,9 @@ class FaceBox(nn.Module):
         # print('conv1', x.size())
         x = torch.cat((F.relu(x), F.relu(-x)), 1)
         # print('CReLu', x.size())
-
         x = F.max_pool2d(x, kernel_size=3, stride=2, padding=1)
         # print('max_pool2d', x.size())
+
         x = self.conv2(x)
         # print('conv2', x.size())
         x = torch.cat((F.relu(x), F.relu(-x)), 1)
@@ -110,6 +110,6 @@ if __name__ == '__main__':
     model = FaceBox()
     data = Variable(torch.randn(1, 3, 1024, 1024))
     loc, conf = model(data)
-    print('loc', loc.size())
-    print('conf', conf.size())
+    print('loc', loc.size())            # ('loc', (1, 21824, 4))
+    print('conf', conf.size())          # ('conf', (1, 21824, 2))
 
