@@ -13,8 +13,8 @@ class DataEncoder:
         compute default boxes
         '''
         scale = 1024.
-        steps = [s / scale for s in (32, 64, 128)]
-        sizes = [s / scale for s in (32, 256, 512)]     # 当32改为64时，achor与label匹配的正样本数目更多
+        steps = [s / scale for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+        sizes = [s / scale for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
         aspect_ratios = ((1, 2, 4), (1,), (1,))
         feature_map_sizes = (32, 16, 8)
 
