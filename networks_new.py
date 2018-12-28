@@ -51,9 +51,11 @@ class FaceBox(nn.Module):
     def __init__(self):
         super(FaceBox, self).__init__()
 
-        #model
-        self.conv1 = nn.Conv2d(3, 24, kernel_size=7, stride=4, padding=3)
-        self.conv2 = nn.Conv2d(48, 64, kernel_size=5, stride=2, padding=2)
+        # model
+        # self.conv1 = nn.Conv2d(3, 24, kernel_size=5, stride=2, padding=2)
+        # self.conv2 = nn.Conv2d(48, 64, kernel_size=5, stride=2, padding=2)
+        self.conv1 = nn.Conv2d(3, 24, kernel_size=3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(48, 64, kernel_size=3, stride=2, padding=1)
 
         self.inception1 = Inception()
         self.inception2 = Inception()
@@ -109,7 +111,7 @@ class FaceBox(nn.Module):
 
 if __name__ == '__main__':
     model = FaceBox()
-    data = Variable(torch.randn(1, 3, 1024, 1024))
+    data = Variable(torch.randn(1, 3, 512, 512))
     start = time.time()
     loc, conf = model(data)
     end = time.time()
