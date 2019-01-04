@@ -204,7 +204,7 @@ def parse_argvs():
                         default='../Data/car_rough_detect/car_detect_test/')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect_256.pt')
-    parser.add_argument('--batch_size', type=int, help='batch size', default=16)
+    parser.add_argument('--batch_size', type=int, help='batch size', default=32)
     parser.add_argument('--img_size', type=int, help='img size', default=256)
     parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
     parser.add_argument('--nms_threshold', type=float, help='learning rate', default=0.0)
