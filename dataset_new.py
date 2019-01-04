@@ -43,7 +43,8 @@ class ListDataset(data.Dataset):
         self.boxes = []
         self.labels = []
         self.image_size = image_size
-        self.small_threshold = 10. / self.image_size    # face that small than threshold will be ignored
+        # self.small_threshold = 10. / self.image_size      # face that small than threshold will be ignored
+        self.small_threshold = 10. / 1024                   # face that small than threshold will be ignored
         self.data_encoder = DataEncoder()
 
         with open(list_file) as f:
