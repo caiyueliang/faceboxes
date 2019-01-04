@@ -6,7 +6,7 @@ from torch.autograd import Variable
 import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms as T
-from networks_256 import FaceBox
+from networks_256 import FaceBox_256
 from multibox_loss import MultiBoxLoss
 from dataset_new import ListDataset
 import common
@@ -218,7 +218,7 @@ def parse_argvs():
 if __name__ == '__main__':
     args = parse_argvs()
 
-    model = FaceBox()
+    model = FaceBox_256()
     model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path, model_file=args.output_model_path,
                               model=model, batch_size=args.batch_size, img_size=args.img_size,
                               lr=args.lr, use_gpu=args.cuda, nms_threshold=args.nms_threshold)

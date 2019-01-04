@@ -45,11 +45,11 @@ class Inception(nn.Module):
         return output
 
 
-class FaceBox(nn.Module):
+class FaceBox_256(nn.Module):
     input_size = 1024
 
     def __init__(self):
-        super(FaceBox, self).__init__()
+        super(FaceBox_256, self).__init__()
 
         # model
         # self.conv1 = nn.Conv2d(3, 24, kernel_size=5, stride=2, padding=2)
@@ -110,7 +110,7 @@ class FaceBox(nn.Module):
 
 
 if __name__ == '__main__':
-    model = FaceBox()
+    model = FaceBox_256()
     data = Variable(torch.randn(1, 3, 256, 256))
     start = time.time()
     loc, conf = model(data)
