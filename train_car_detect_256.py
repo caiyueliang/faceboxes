@@ -6,7 +6,7 @@ from torch.autograd import Variable
 import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms as T
-from networks_new import FaceBox
+from networks_256 import FaceBox
 from multibox_loss import MultiBoxLoss
 from dataset_new import ListDataset
 import common
@@ -33,7 +33,7 @@ def show_img(img, boxes):
 
 
 class ModuleTrain:
-    def __init__(self, train_path, test_path, model_file, model, img_size=512, batch_size=16, lr=1e-3,
+    def __init__(self, train_path, test_path, model_file, model, img_size=256, batch_size=32, lr=1e-3,
                  re_train=False, best_loss=2, use_gpu=False, nms_threshold=0.5):
         self.train_path = train_path
         self.test_path = test_path
@@ -203,9 +203,9 @@ def parse_argvs():
     parser.add_argument('--test_path', type=str, help='test dataset path',
                         default='../Data/car_rough_detect/car_detect_test/')
 
-    parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect_512.pt')
+    parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect_256.pt')
     parser.add_argument('--batch_size', type=int, help='batch size', default=16)
-    parser.add_argument('--img_size', type=int, help='img size', default=512)
+    parser.add_argument('--img_size', type=int, help='img size', default=256)
     parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
     parser.add_argument('--nms_threshold', type=float, help='learning rate', default=0.0)
     parser.add_argument('--cuda', type=bool, help='use gpu', default=True)

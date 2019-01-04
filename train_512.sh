@@ -1,1 +1,1 @@
-python train_car_detect_new.py --lr 0.0001
+python train_car_detect_512.py --lr 0.0001

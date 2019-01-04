@@ -1,0 +1,1 @@
+python train_car_detect_256.py --lr 0.001
