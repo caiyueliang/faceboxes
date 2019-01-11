@@ -96,8 +96,10 @@ class ModuleTrain:
         pass
 
     def train(self, epoch, decay_epoch=60, save_best=True):
-        # self.model.train()
+
         for epoch_i in range(epoch):
+            self.model.train()
+
             train_loss = 0.0
             if epoch_i >= decay_epoch and epoch_i % decay_epoch == 0:
                 self.lr *= 0.1
@@ -144,6 +146,7 @@ class ModuleTrain:
         self.save(self.model_file)
 
     def test(self, show_info=False):
+        self.model.eval()
         test_loss = 0
         data_encoder = DataEncoder()
 
