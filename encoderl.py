@@ -287,7 +287,7 @@ if __name__ == '__main__':
     dataencoder = DataEncoder()
     # dataencoder.test_iou()
 
-    img = cv2.imread("../Data/car_rough_detect/car_detect_train/failed_3/9488513_鄂A578U2_3.jpg")
+    img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
     img = cv2.resize(img, (1024, 1024))
     dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
     # print((dataencoder.default_boxes))
