@@ -41,9 +41,9 @@ class DataEncoder:
         self.default_boxes = torch.Tensor(boxes)
 
     def test_iou(self):
-        box1 = torch.Tensor([0,0,10,10])
-        box1 = box1[None,:]
-        box2 = torch.Tensor([[5,0,15,10],[5,0,15,10]])
+        box1 = torch.Tensor([0, 0, 10, 10])
+        box1 = box1[None, :]
+        box2 = torch.Tensor([[5, 0, 15, 10], [5, 0, 15, 10]])
         print('iou', self.iou(box1, box2))
 
     def iou(self, box1, box2):
@@ -148,16 +148,16 @@ class DataEncoder:
 
     def encode(self, boxes, classes, threshold=0.35):
         '''
-        boxes:[num_obj, 4]
-        default_box (x1,y1,x2,y2)
-        return:boxes: (tensor) [num_obj,21824,4]
-        classes:class label [obj,]
+        boxes:          [num_obj, 4]                    # 二维 [[x1, y1, x2, y2], [x3, y3, x4, y4]]
+            default_box (x1,y1,x2,y2)
+        classes:class   label [obj,]                    # [1, 1]
+        return:boxes:   (tensor) [num_obj,21824,4]
         '''
         boxes_org = boxes
 
         # print(boxes, classes)
-        default_boxes = self.default_boxes              # [21824,4]
-        num_default_boxes = default_boxes.size(0)
+        default_boxes = self.default_boxes              # [21824, 4]
+        num_default_boxes = default_boxes.size(0)       # 21824
         num_obj = boxes.size(0)                         # 人脸个数
         # print('num_faces {}'.format(num_obj))
 
@@ -284,8 +284,8 @@ class DataEncoder:
 
 if __name__ == '__main__':
     dataencoder = DataEncoder()
-    # dataencoder.test_iou()
-    dataencoder.test_encode()
+    dataencoder.test_iou()
+    # dataencoder.test_encode()
     # print((dataencoder.default_boxes))
     # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
     # dataencoder.encode(boxes,torch.Tensor([1,1]))

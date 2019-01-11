@@ -26,9 +26,9 @@ class ListDataset(data.Dataset):
         self.root = root
         self.train = train
         self.transform = transform
-        self.fnames = []
-        self.boxes = []
-        self.labels = []
+        self.fnames = []                                # 文件名列表
+        self.boxes = []                                 # 位置标签列表，格式 [x1, y1, x2, y2]
+        self.labels = []                                # 类别标签列表?
         self.small_threshold = 10. / self.image_size    # face that small than threshold will be ignored
         self.data_encoder = DataEncoder()
 
@@ -48,8 +48,8 @@ class ListDataset(data.Dataset):
                 w = float(splited[4+5*i])
                 h = float(splited[5+5*i])
                 c = int(splited[6+5*i])
-                box.append([x, y, x+w, y+h])
-                label.append(c)
+                box.append([x, y, x+w, y+h])            # [[x1, y1, x2, y2], [x3, y3, x4, y4]]
+                label.append(c)                         # [1, 1]
                 # print('box', box, 'label', label)
             self.boxes.append(torch.Tensor(box))
             self.labels.append(torch.LongTensor(label))
@@ -61,8 +61,8 @@ class ListDataset(data.Dataset):
         # print(os.path.join(self.root + fname))
         assert img is not None
 
-        boxes = self.boxes[idx].clone()
-        labels = self.labels[idx].clone()
+        boxes = self.boxes[idx].clone()         # 获取某一张图片对应的位置信息（可能多个）
+        labels = self.labels[idx].clone()       # 获取某一张图片对应的类别信息（可能多个）
 
         # 图片增广
         if self.train:
@@ -75,12 +75,12 @@ class ListDataset(data.Dataset):
         h, w, _ = img.shape
         img = cv2.resize(img, (self.image_size, self.image_size))
 
-        boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)
+        boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)                # 位置信息除以宽或高（归一化）
         # for t in self.transform:
         #     img = t(img)
         img = self.transform(img)
 
-        loc_target, conf_target = self.data_encoder.encode(boxes, labels)
+        loc_target, conf_target = self.data_encoder.encode(boxes, labels)   # 对位置标签进行转换
 
         return img, loc_target, conf_target
 
