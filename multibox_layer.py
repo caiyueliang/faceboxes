@@ -26,13 +26,17 @@ class MultiBoxLayer(nn.Module):
     def forward(self, xs):
         '''
         xs:list of 之前的feature map list
+        xs含有三个矩阵，size分别是： [(-1, 128, 32, 32), (-1, 256, 16, 16), (-1, 256, 8, 8)]
         retrun: loc_preds: [N, 21842, 4]
                 conf_preds:[N, 21842, 2]
         '''
 
         y_locs = []
         y_confs = []
+
+        # 循环处理每一层的矩阵
         for i, x in enumerate(xs):
+            # 处理坐标
             y_loc = self.loc_layers[i](x)
             # print('loc MultiBoxLayer_Conv2d', y_loc.size())       # (-1, 84, 32, 32) (-1, 4, 16, 16) (-1, 4, 8, 8)
             N = y_loc.size(0)                                       # N为维度，类似通道数c
@@ -43,6 +47,7 @@ class MultiBoxLayer(nn.Module):
             # print('loc MultiBoxLayer_view', y_loc.size())         # (-1, 21504, 4)   (-1, 256, 4)    (-1, 64, 4)
             y_locs.append(y_loc)
 
+            # 处理置信度
             y_conf = self.conf_layers[i](x)
             # print('y_conf MultiBoxLayer_y_conf', y_conf.size())   # (-1, 42, 32, 32) (-1, 4, 8, 8)   (-1, 2, 8, 8)
             y_conf = y_conf.permute(0, 2, 3, 1).contiguous()

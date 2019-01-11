@@ -119,7 +119,7 @@ class ModuleTrain:
                     images, loc_targets, conf_targets = images.cuda(), loc_targets.cuda(), conf_targets.cuda()
 
                 loc_preds, conf_preds = self.model(images)
-                loss = self.criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失
+                loss = self.criterion(loc_preds, loc_targets, conf_preds, conf_targets)  # 计算损失，用MultiBoxLoss
                 train_loss += loss.item()
 
                 self.optimizer.zero_grad()
