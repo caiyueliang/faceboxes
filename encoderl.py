@@ -161,6 +161,7 @@ class DataEncoder:
         num_obj = boxes.size(0)                         # 人脸个数
         # print('num_faces {}'.format(num_obj))
 
+        # 计算iou
         iou = self.iou(
             boxes,
             torch.cat([default_boxes[:, :2]-default_boxes[:, 2:]/2, default_boxes[:, :2]+default_boxes[:, 2:]/2], 1))
@@ -284,8 +285,11 @@ class DataEncoder:
 
 if __name__ == '__main__':
     dataencoder = DataEncoder()
-    dataencoder.test_iou()
-    # dataencoder.test_encode()
+    # dataencoder.test_iou()
+
+    img = cv2.imread("../Data/car_rough_detect/car_detect_train/failed_3/9488513_鄂A578U2_3.jpg")
+    img = cv2.resize(img, (1024, 1024))
+    dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
     # print((dataencoder.default_boxes))
     # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
     # dataencoder.encode(boxes,torch.Tensor([1,1]))
