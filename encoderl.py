@@ -97,6 +97,8 @@ class DataEncoder:
         # box = box[None,:]
         # label = torch.LongTensor([1])
         # label = label[None,:]
+
+        # 测试 encode
         loc, conf = self.encode(boxes, label, threshold=0.35)
         print('conf', type(conf), conf.size(), conf.long().sum())
         print('loc', type(loc), loc.size())
@@ -161,6 +163,21 @@ class DataEncoder:
         # for i in range(conf.size(0)):
             # if conf[i].numpy != 0:
                 # print()
+
+        # 测试 decode
+        conf_change = []
+        for c in conf:
+            if c == 0:
+                conf_change.append([1, 0])
+            else:
+                conf_change.append([0, 1])
+        boxes, labels, max_conf = self.decode(loc, torch.Tensor(conf_change), False)
+        print(boxes, labels, max_conf)
+
+        im = img.copy()
+        for box in boxes:
+            cv2.rectangle(im, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (255, 255, 0))
+        cv2.imwrite('test_encoder_3.jpg', im)
 
     def encode(self, boxes, classes, threshold=0.35):
         '''
@@ -286,7 +303,8 @@ class DataEncoder:
         loc [21842, 4]
         conf [21824, 2]
         '''
-        # print('decode', loc, conf)
+        print('loc', loc.size(), loc)
+        print('conf', conf.size(), conf)
         variances = [0.1, 0.2]
 
         if use_gpu:
@@ -294,26 +312,30 @@ class DataEncoder:
             wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:].cuda()
             boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
         else:
-            cxcy = loc[:, :2].cuda() * variances[0] * self.default_boxes[:, 2:] + self.default_boxes[:, :2]
-            wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:]
+            cxcy = loc[:, :2] * variances[0] * self.default_boxes[:, 2:] + self.default_boxes[:, :2]
+            wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:]   # 返回一个新张量，包含输入input张量每个元素的指数
             boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
 
-        conf[:, 0] = 0.4
+        print('cxcy', cxcy.size(), cxcy)
+        print('wh', wh.size(), wh)
+        print('boxes', boxes.size(), boxes)
 
-        max_conf, labels = conf.max(1)                      # [21842,1]
+        conf[:, 0] = 0.4    # 置信度第0列（背景）设为0.4，下面再取最大值，目的是为了过滤置信度小于0.4的标签
+        max_conf, labels = conf.max(1)                          # [21842,1]
+
         # print(max_conf)
         # print('labels', labels.long().sum().item())
-        if labels.long().sum().item() is 0:
+        if labels.long().sum().item() is 0:                     # 标签和为0？表示图片没有标签？
             sconf, slabel = conf.max(0)
             max_conf[slabel[0:5]] = sconf[0:5]
             labels[slabel[0:5]] = 1
 
         # print('labels', labels)
         ids = labels.nonzero().squeeze(1)
-        # print('ids', ids)
+        print('ids', ids)
         # print('boxes', boxes.size(), boxes[ids])
 
-        keep = self.nms(boxes[ids], max_conf[ids], nms_threshold)#.squeeze(1))
+        keep = self.nms(boxes[ids], max_conf[ids], nms_threshold)   # .squeeze(1))
 
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
 
