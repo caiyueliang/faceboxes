@@ -185,17 +185,18 @@ class DataEncoder:
                 if iou_item > threshold:
                     print(i, j, iou_item)
 
-        max_iou, max_iou_index = iou.max(1)             # 为每一个bounding box不管IOU大小，都设置一个与之IOU最大的default_box
+        max_iou, max_iou_index = iou.max(1)         # 为boxes中的每一个bounding box（边界框），不管IOU大小，都设置一个与之IOU最大的default_box
         print('max_iou', max_iou)
         print('max_iou_index', max_iou_index)
-        iou, max_index = iou.max(0)                     # 每一个default_boxes对应到与之IOU最大的bounding box上
-        print('iou', iou)
-        print('max_index', max_index)
+        iou, max_index = iou.max(0)                 # 每一个default_boxes对应到与之IOU最大的boxes上的bounding box（边界框）
+        print('max_index', max_index.size(), max_index)
+        print('iou', iou.size(), iou)
 
         # print(max(iou))
         max_index.squeeze_(0)                           # torch.LongTensor 21824
         iou.squeeze_(0)
-        # print('boxes', boxes.size(), boxes, 'max_index', max_index)
+        print('max_index', max_index.size(), max_index)
+        print('iou', iou.size(), iou)
 
         max_index[max_iou_index] = torch.LongTensor(range(num_obj))
 
