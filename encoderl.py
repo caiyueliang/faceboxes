@@ -39,6 +39,7 @@ class DataEncoder:
                         boxes.append((cx, cy, s*ar, s*ar))
 
         self.default_boxes = torch.Tensor(boxes)
+        print('default_boxes', self.default_boxes.size(), self.default_boxes)
 
     def test_iou(self):
         box1 = torch.Tensor([0, 0, 10, 10])
@@ -88,19 +89,18 @@ class DataEncoder:
         # label = label[None,:]
         loc, conf = self.encode(boxes, label)
         print('conf', type(conf), conf.size(), conf.long().sum())
-        print('loc', loc)
+        print('loc', type(loc), loc.size())
         # img = cv2.imread('test1.jpg')
         w, h, _ = img.shape
-        print('boxes', boxes)
-        for box in boxes:
-            print('box', box)
-            cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
-        cv2.imwrite('test_encoder.jpg', img)
 
-        print(type(conf))
+        # 画输入的boxes
+        for box in boxes:
+            cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+
+        # print(type(conf))
         for i in range(len(self.default_boxes)):
             if conf[i] != 0:
-                print(i)
+                print(i, conf[i])
 
         im = img.copy()
         # for i in range(42):
@@ -110,15 +110,15 @@ class DataEncoder:
             box_item = self.default_boxes[i]*w
             centerx, centery = int(box_item[0]), int(box_item[1])
             if conf[i] != 0:
-                cv2.circle(im, (centerx, centery), 4, (0,255,0))
+                cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
             else:
-                cv2.circle(im, (centerx, centery), 1, (0,0,255))
+                cv2.circle(im, (centerx, centery), 1, (0, 0, 255))      # 小红点
         box = self.default_boxes[0]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
+        cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
         box = self.default_boxes[16]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
+        cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
         box = self.default_boxes[20]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
+        cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
         cv2.imwrite('test_encoder_0.jpg', im)
 
         im = img.copy()
@@ -163,7 +163,6 @@ class DataEncoder:
         num_default_boxes = default_boxes.size(0)       # 21824
         num_obj = boxes.size(0)                         # 人脸个数
         print('[encode] num_obj', num_obj)
-        # print('num_faces {}'.format(num_obj))
 
         # 计算iou
         iou = self.iou(
