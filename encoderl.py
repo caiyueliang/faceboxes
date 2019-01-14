@@ -91,8 +91,11 @@ class DataEncoder:
         print('loc', loc)
         # img = cv2.imread('test1.jpg')
         w, h, _ = img.shape
+        print('boxes', boxes)
         for box in boxes:
-            cv2.rectangle(img, (int(box[0]*w),int(box[1]*w)), (int(box[2]*w), int(box[3]*w)), (0,255,0))
+            print('box', box)
+            cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+        cv2.imwrite('test_encoder.jpg', img)
 
         print(type(conf))
         for i in range(len(self.default_boxes)):
@@ -111,11 +114,11 @@ class DataEncoder:
             else:
                 cv2.circle(im, (centerx, centery), 1, (0,0,255))
         box = self.default_boxes[0]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*w)), (0,255,0))
+        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
         box = self.default_boxes[16]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*w)), (0,255,0))
+        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
         box = self.default_boxes[20]
-        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*w)), (0,255,0))
+        cv2.rectangle(im, (0,0), (int(box[2]*w), int(box[3]*h)), (0,255,0))
         cv2.imwrite('test_encoder_0.jpg', im)
 
         im = img.copy()
@@ -155,10 +158,11 @@ class DataEncoder:
         '''
         boxes_org = boxes
 
-        # print(boxes, classes)
+        print(boxes, classes)
         default_boxes = self.default_boxes              # [21824, 4]
         num_default_boxes = default_boxes.size(0)       # 21824
         num_obj = boxes.size(0)                         # 人脸个数
+        print('[encode] num_obj', num_obj)
         # print('num_faces {}'.format(num_obj))
 
         # 计算iou
@@ -288,8 +292,12 @@ if __name__ == '__main__':
     # dataencoder.test_iou()
 
     img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
+    h, w, _ = img.shape
     img = cv2.resize(img, (1024, 1024))
-    dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
+    # w, h, _ = img.shape
+    # dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
+    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+
     # print((dataencoder.default_boxes))
     # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
     # dataencoder.encode(boxes,torch.Tensor([1,1]))
