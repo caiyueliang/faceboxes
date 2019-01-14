@@ -64,8 +64,11 @@ class DataEncoder:
         Return:
           (tensor) iou, sized [N,M].
         '''
+
         N = box1.size(0)
         M = box2.size(0)
+        print(box1.size(), box1)
+        print(box2.size(), box2)
 
         lt = torch.max( # left top
             box1[:, :2].unsqueeze(1).expand(N,M,2),  # [N,2] -> [N,1,2] -> [N,M,2]
@@ -94,7 +97,7 @@ class DataEncoder:
         # box = box[None,:]
         # label = torch.LongTensor([1])
         # label = label[None,:]
-        loc, conf = self.encode(boxes, label)
+        loc, conf = self.encode(boxes, label, threshold=0.35)
         print('conf', type(conf), conf.size(), conf.long().sum())
         print('loc', type(loc), loc.size())
         # img = cv2.imread('test1.jpg')
@@ -172,15 +175,22 @@ class DataEncoder:
         num_obj = boxes.size(0)                         # 人脸个数
         print('[encode] num_obj', num_obj)
 
-        # 计算iou
+        # 计算iou,交并比
         iou = self.iou(
             boxes,
             torch.cat([default_boxes[:, :2]-default_boxes[:, 2:]/2, default_boxes[:, :2]+default_boxes[:, 2:]/2], 1))
-        # iou = self.iou(boxes, default_boxes)
-        # print('iou size {}'.format(iou.size()))
+        # print('iou ', iou.size(), iou)
+        for i, iou_line in enumerate(iou):
+            for j, iou_item in enumerate(iou_line):
+                if iou_item > threshold:
+                    print(i, j, iou_item)
 
         max_iou, max_iou_index = iou.max(1)             # 为每一个bounding box不管IOU大小，都设置一个与之IOU最大的default_box
+        print('max_iou', max_iou)
+        print('max_iou_index', max_iou_index)
         iou, max_index = iou.max(0)                     # 每一个default_boxes对应到与之IOU最大的bounding box上
+        print('iou', iou)
+        print('max_index', max_index)
 
         # print(max(iou))
         max_index.squeeze_(0)                           # torch.LongTensor 21824
