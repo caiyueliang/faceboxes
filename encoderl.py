@@ -231,7 +231,7 @@ class DataEncoder:
         cxcy = (boxes[:, :2] + boxes[:, 2:])/2 - default_boxes[:, :2]       # [21824,2]
         cxcy /= variances[0] * default_boxes[:, 2:]
         wh = (boxes[:, 2:] - boxes[:, :2]) / default_boxes[:, 2:]           # [21824,2]  为什么会出现0宽度？？
-        wh = torch.log(wh) / variances[1]                                   # Variable
+        wh = torch.log(wh) / variances[1]                                   # Variable. log求自然对数
 
         inf_flag = wh.abs() > 10000
 
@@ -244,6 +244,7 @@ class DataEncoder:
             raise BaseException('[my exception] inf error')
 
         loc = torch.cat([cxcy, wh], 1)      # [21824,4]
+        print('loc', loc.size(), loc)
 
         conf = classes[max_index]           # 其实都是1 [21824,]
         print('conf', conf.size(), conf)
@@ -307,14 +308,19 @@ class DataEncoder:
         print('conf', conf.size(), conf)
         variances = [0.1, 0.2]
 
+        # variances = [0.1, 0.2]
+        # cxcy = (boxes[:, :2] + boxes[:, 2:])/2 - default_boxes[:, :2]       # [21824,2]
+        # cxcy /= variances[0] * default_boxes[:, 2:]
+        # wh = (boxes[:, 2:] - boxes[:, :2]) / default_boxes[:, 2:]           # [21824,2]  为什么会出现0宽度？？
+        # wh = torch.log(wh) / variances[1]                                   # Variable. log求自然对数
         if use_gpu:
             cxcy = loc[:, :2].cuda() * variances[0] * self.default_boxes[:, 2:].cuda() + self.default_boxes[:, :2].cuda()
             wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:].cuda()
-            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
+            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)                        # [21824,4]
         else:
             cxcy = loc[:, :2] * variances[0] * self.default_boxes[:, 2:] + self.default_boxes[:, :2]
             wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:]   # 返回一个新张量，包含输入input张量每个元素的指数
-            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
+            boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)                        # [21824,4]
 
         print('cxcy', cxcy.size(), cxcy)
         print('wh', wh.size(), wh)
