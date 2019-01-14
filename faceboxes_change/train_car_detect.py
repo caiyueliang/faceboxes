@@ -77,8 +77,8 @@ class ModuleTrain:
         ])
 
         # Dataset
-        train_label = os.path.join(self.train_path, 'car_detect_train_label.txt')
-        test_label = os.path.join(self.test_path, 'car_detect_test_label.txt')
+        train_label = os.path.join(self.train_path, 'faceboxes_label.txt')
+        test_label = os.path.join(self.test_path, 'faceboxes_label.txt')
         train_dataset = ListDataset(root=self.train_path, list_file=train_label, train=True, transform=self.transform_train)
         self.train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
         test_dataset = ListDataset(root=self.test_path, list_file=test_label, train=False, transform=self.transform_test)
@@ -200,9 +200,9 @@ class ModuleTrain:
 def parse_argvs():
     parser = ArgumentParser(description='car_classifier')
     parser.add_argument('--train_path', type=str, help='train dataset path',
-                        default='../Data/car_rough_detect/car_detect_train/')
+                        default='../../Data/yolo/yolo_data_new/car_detect_train/')
     parser.add_argument('--test_path', type=str, help='test dataset path',
-                        default='../Data/car_rough_detect/car_detect_test/')
+                        default='../../Data/yolo/yolo_data_new/car_detect_train/')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')
     parser.add_argument('--batch_size', type=int, help='batch size', default=16)
