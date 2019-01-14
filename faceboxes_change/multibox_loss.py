@@ -10,10 +10,11 @@ from torch.autograd import Variable
 
 
 class MultiBoxLoss(nn.Module):
-    num_classes = 2
 
     def __init__(self):
         super(MultiBoxLoss,self).__init__()
+        self.num_classes = 3
+        self.loss = F.cross_entropy
 
     def cross_entropy_loss(self, x, y):
         x = x.detach()
@@ -46,7 +47,7 @@ class MultiBoxLoss(nn.Module):
         '''
         loc_preds       [batch, 21842, 4]
         loc_targets     [batch, 21842, 4]
-        conf_preds      [batch, 21842, 2]
+        conf_preds      [batch, 21842, 3]
         conf_targets    [batch, 21842]
         '''
         batch_size, num_boxes, _ = loc_preds.size()
@@ -75,12 +76,16 @@ class MultiBoxLoss(nn.Module):
         #     print('targets', pos_loc_targets)
         # print('ok3')
         # temp_conf_loss = Variable(requires_grad=False)
-        conf_loss = self.cross_entropy_loss(conf_preds.view(-1, self.num_classes), conf_targets.view(-1, 1))
+
+        # 交叉熵   # 参数：预测值和实际值
+        # conf_loss = self.cross_entropy_loss(conf_preds.view(-1, self.num_classes), conf_targets.view(-1, 1))
+        conf_loss = self.loss(conf_preds.view(-1, self.num_classes), conf_targets.view(-1, 1))
+
         # print('conf_loss size {}'.format(conf_loss.size()))
         neg = self.hard_negative_mining(conf_loss, pos)
-        pos_mask = pos.unsqueeze(2).expand_as(conf_preds)
 
-        neg_mask = neg.unsqueeze(2).expand_as(conf_preds)
+        pos_mask = pos.unsqueeze(2).expand_as(conf_preds)       # 积极mask
+        neg_mask = neg.unsqueeze(2).expand_as(conf_preds)       # 消极mask
         # print('sum neg mask {} size {}'.format(torch.sum(neg_mask),neg_mask.size()))
         # print('sum pos mask {} size {}'.format(torch.sum(pos_mask),pos_mask.size()))
         # print(neg_mask)

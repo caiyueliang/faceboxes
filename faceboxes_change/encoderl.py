@@ -251,8 +251,8 @@ class DataEncoder:
         print('conf', conf.size(), conf)
         conf[iou < threshold] = 0           # iou小的设为背景， 0为背景
         print('conf', conf.size(), conf)
-        conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
-        print('conf', conf.size(), conf)
+        # conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
+        # print('conf', conf.size(), conf)
                                             # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
                                             # 做的宽度为0，但是没有被滤掉，是因为max(1)必须为每一个object选择一个
                                             # 与之对应的default_box，需要修改数据集里的label。
@@ -356,7 +356,7 @@ if __name__ == '__main__':
     img = cv2.resize(img, (1024, 1024))
     # w, h, _ = img.shape
     # dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
-    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 2]))
 
     # print((dataencoder.default_boxes))
     # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
