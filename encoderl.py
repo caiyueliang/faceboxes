@@ -120,8 +120,10 @@ class DataEncoder:
             box_item = self.default_boxes[i]*w
             # print(box_item)
             centerx, centery = int(box_item[0]), int(box_item[1])
-            if conf[i] != 0:
+            if conf[i] == 1:
                 cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+            elif conf[i] == 2:
+                cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
             else:
                 cv2.circle(im, (centerx, centery), 1, (0, 0, 255))      # 小红点
         box = self.default_boxes[0]
@@ -168,8 +170,9 @@ class DataEncoder:
         return:boxes:   (tensor) [num_obj,21824,4]
         '''
         boxes_org = boxes
+        print('boxes', boxes.size(), boxes)
+        print('classes', classes.size(), classes)
 
-        print(boxes, classes)
         default_boxes = self.default_boxes              # [21824, 4]
         num_default_boxes = default_boxes.size(0)       # 21824
         num_obj = boxes.size(0)                         # 人脸个数
@@ -180,17 +183,18 @@ class DataEncoder:
             boxes,
             torch.cat([default_boxes[:, :2]-default_boxes[:, 2:]/2, default_boxes[:, :2]+default_boxes[:, 2:]/2], 1))
         # print('iou ', iou.size(), iou)
-        for i, iou_line in enumerate(iou):
-            for j, iou_item in enumerate(iou_line):
-                if iou_item > threshold:
-                    print(i, j, iou_item)
+        # for i, iou_line in enumerate(iou):
+        #     for j, iou_item in enumerate(iou_line):
+        #         if iou_item > threshold:
+        #             print(i, j, iou_item)
 
         max_iou, max_iou_index = iou.max(1)         # 为boxes中的每一个bounding box（边界框），不管IOU大小，都设置一个与之IOU最大的default_box
-        print('max_iou', max_iou)
-        print('max_iou_index', max_iou_index)
+        print('max_iou', max_iou)                   # max_iou, default_box中，IOU最大的值是多少;有几个边界框，就有几个最大值
+        print('max_iou_index', max_iou_index)       # max_iou_index, default_box中，IOU最大的值对应的index;有几个边界框，就有几个索引值
+
         iou, max_index = iou.max(0)                 # 每一个default_boxes对应到与之IOU最大的boxes上的bounding box（边界框）
-        print('max_index', max_index.size(), max_index)
         print('iou', iou.size(), iou)
+        print('max_index', max_index.size(), max_index)
 
         # print(max(iou))
         max_index.squeeze_(0)                           # torch.LongTensor 21824
@@ -198,12 +202,17 @@ class DataEncoder:
         print('max_index', max_index.size(), max_index)
         print('iou', iou.size(), iou)
 
+        print('max_index[max_iou_index]', max_index[max_iou_index])
         max_index[max_iou_index] = torch.LongTensor(range(num_obj))
+        print('max_index[max_iou_index]', max_index[max_iou_index])
+        print('max_index', max_index.size(), max_index)
 
         boxes = boxes[max_index]                        # [21824,4]是图像label
+        print('boxes', boxes.size(), boxes)
+
         variances = [0.1, 0.2]
         cxcy = (boxes[:, :2] + boxes[:, 2:])/2 - default_boxes[:, :2]       # [21824,2]
-        cxcy /= variances[0] * default_boxes[:,2:]
+        cxcy /= variances[0] * default_boxes[:, 2:]
         wh = (boxes[:, 2:] - boxes[:, :2]) / default_boxes[:, 2:]           # [21824,2]  为什么会出现0宽度？？
         wh = torch.log(wh) / variances[1]                                   # Variable
 
@@ -218,9 +227,13 @@ class DataEncoder:
             raise BaseException('[my exception] inf error')
 
         loc = torch.cat([cxcy, wh], 1)      # [21824,4]
+
         conf = classes[max_index]           # 其实都是1 [21824,]
-        conf[iou < threshold] = 0           # iou小的设为背景
-        conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
+        print('conf', conf.size(), conf)
+        conf[iou < threshold] = 0           # iou小的设为背景， 0为背景
+        print('conf', conf.size(), conf)
+        # conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
+        # print('conf', conf.size(), conf)
                                             # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
                                             # 做的宽度为0，但是没有被滤掉，是因为max(1)必须为每一个object选择一个
                                             # 与之对应的default_box，需要修改数据集里的label。
@@ -285,7 +298,7 @@ class DataEncoder:
             wh = torch.exp(loc[:, 2:] * variances[1]) * self.default_boxes[:, 2:]
             boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)        # [21824,4]
 
-        conf[:,0] = 0.4
+        conf[:, 0] = 0.4
 
         max_conf, labels = conf.max(1)                      # [21842,1]
         # print(max_conf)
@@ -314,7 +327,7 @@ if __name__ == '__main__':
     img = cv2.resize(img, (1024, 1024))
     # w, h, _ = img.shape
     # dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
-    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 2]))
 
     # print((dataencoder.default_boxes))
     # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
