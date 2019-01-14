@@ -10,18 +10,19 @@ from torch.autograd import Variable
 
 
 class MultiBoxLayer(nn.Module):
-    num_classes = 2                                 # 2类，是人脸或是背景
+    num_classes = 3                                 # 3类，是车牌或车辆或背景
     num_anchors = [21, 1, 1]                        # 21=4*4+2*2+1（对应anchor的大小32,64,128，保证anchor密度相同）
     in_planes = [128, 256, 256]                     # Inception3通道数, Conv3_2通道数, Conv4_2通道数
 
     def __init__(self):
         super(MultiBoxLayer, self).__init__()
 
-        self.loc_layers = nn.ModuleList()
-        self.conf_layers = nn.ModuleList()
+        self.loc_layers = nn.ModuleList()           # 预测坐标
+        self.conf_layers = nn.ModuleList()          # 预测置信度
+
         for i in range(len(self.in_planes)):
-            self.loc_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*4, kernel_size=3, padding=1))
-            self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*2, kernel_size=3, padding=1))
+            self.loc_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i] * 4, kernel_size=3, padding=1))
+            self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i] * 3, kernel_size=3, padding=1))
 
     def forward(self, xs):
         '''
@@ -49,18 +50,18 @@ class MultiBoxLayer(nn.Module):
 
             # 处理置信度
             y_conf = self.conf_layers[i](x)
-            # print('y_conf MultiBoxLayer_y_conf', y_conf.size())   # (-1, 42, 32, 32) (-1, 4, 8, 8)   (-1, 2, 8, 8)
+            # print('y_conf MultiBoxLayer_y_conf', y_conf.size())   # (-1, 63, 32, 32) (-1, 3, 16, 16)  (-1, 3, 8, 8)
             y_conf = y_conf.permute(0, 2, 3, 1).contiguous()
-            # print('y_conf MultiBoxLayer_permute', y_conf.size())  # (-1, 32, 32, 42) (-1, 8, 8, 4)   (-1, 8, 8, 2)
-            y_conf = y_conf.view(N, -1, 2)
-            # print('y_conf MultiBoxLayer_view', y_conf.size())     # (-1, 21504, 2)   (-1, 64, 4)     (-1, 64, 2)
+            # print('y_conf MultiBoxLayer_permute', y_conf.size())  # (-1, 32, 32, 63) (-1, 16, 16, 3)  (-1, 8, 8, 4)
+            y_conf = y_conf.view(N, -1, 3)
+            # print('y_conf MultiBoxLayer_view', y_conf.size())     # (-1, 21504, 3)   (-1, 256, 3)     (-1, 64, 3)
             y_confs.append(y_conf)
 
             # print('y_locs', len(y_locs))
             # print('y_confs', len(y_confs))
 
         loc_preds = torch.cat(y_locs, 1)                            # (-1, 21824, 4)   21504+256+64=21824
-        conf_preds = torch.cat(y_confs, 1)                          # (-1, 21824, 2)   21504+256+64=21824
+        conf_preds = torch.cat(y_confs, 1)                          # (-1, 21824, 3)   21504+256+64=21824
         return loc_preds, conf_preds
 
 
