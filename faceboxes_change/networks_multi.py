@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.autograd import Function
 from torch.autograd import Variable
 
-from multibox_layer import MultiBoxLayer
+from multibox_layer_multi import MultiBoxLayer
 
 
 class CReLU(nn.Module):

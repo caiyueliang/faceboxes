@@ -6,8 +6,8 @@ from torch.autograd import Variable
 import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import transforms as T
-from networks import FaceBox
-from multibox_loss import MultiBoxLoss
+from networks_multi import FaceBox
+from multibox_loss_multi import MultiBoxLoss
 from dataset import ListDataset
 import common
 import cv2
