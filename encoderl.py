@@ -351,13 +351,23 @@ if __name__ == '__main__':
     dataencoder = DataEncoder()
     # dataencoder.test_iou()
 
-    img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
+    # img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
+    # h, w, _ = img.shape
+    # img = cv2.resize(img, (1024, 1024))
+    # dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+
+    img = cv2.imread("Data/557831_蓝_粤YXU501.jpg")
     h, w, _ = img.shape
     img = cv2.resize(img, (1024, 1024))
-    # w, h, _ = img.shape
-    # dataencoder.test_encode(torch.Tensor([[32, 266, 262, 351], [455, 138, 572, 179]]), img, torch.LongTensor([1, 1]))
-    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+    # 12.0 15.0 231.0 110.0 1
+    # 1072.0 591.0 239.0 112.0 1
+    # 1461.0 275.0 94.0 36.0 1
+    # 414.0 5.0 1092.0 818.0 2
+    # 1185.0 16.0 435.0 352.0 2
+    boxes = torch.Tensor([[12. / w, 15. / h, 243. / w, 125. / h],
+                          [1072. / w, 591. / h, 1311. / w, 703. / h],
+                          [1461. / w, 275. / h, 1565. / w, 311. / h],
+                          [414. / w, 5. / h, 1506. / w, 823. / h],
+                          [1185. / w, 16. / h, 1620. / w, 368. / h]])
+    dataencoder.test_encode(boxes, img, torch.LongTensor([1, 1, 1, 2, 2]))
 
-    # print((dataencoder.default_boxes))
-    # boxes = torch.Tensor([[-8,-8,24,24],[400,400,500,500]])/1024
-    # dataencoder.encode(boxes,torch.Tensor([1,1]))
