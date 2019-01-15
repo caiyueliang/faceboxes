@@ -234,6 +234,6 @@ if __name__ == '__main__':
                               model=model, batch_size=args.batch_size, img_size=args.img_size,
                               lr=args.lr, use_gpu=args.cuda, nms_threshold=args.nms_threshold)
 
-    model_train.train(300, 80)
+    model_train.train(100, 60)
     # model_train.test(show_info=True)
 
