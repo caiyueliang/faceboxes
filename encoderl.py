@@ -140,8 +140,10 @@ class DataEncoder:
         for i in range(32*32*21, 32*32*21+16*16):
             box_item = self.default_boxes[i]*w
             centerx, centery = int(box_item[0]), int(box_item[1])
-            if conf[i] != 0:
+            if conf[i] == 1:
                 cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+            elif conf[i] == 2:
+                cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
             else:
                 cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
         box = self.default_boxes[32*32*21]
@@ -152,8 +154,10 @@ class DataEncoder:
         for i in range(32*32*21+16*16, len(self.default_boxes)):
             box_item = self.default_boxes[i]*w
             centerx, centery = int(box_item[0]), int(box_item[1])
-            if conf[i] != 0:
+            if conf[i] == 1:
                 cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+            elif conf[i] == 2:
+                cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
             else:
                 cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
         box = self.default_boxes[32*32*21+16*16]
@@ -168,9 +172,11 @@ class DataEncoder:
         conf_change = []
         for c in conf:
             if c == 0:
-                conf_change.append([1, 0])
+                conf_change.append([1, 0, 0])
+            elif c == 1:
+                conf_change.append([0, 1, 0])
             else:
-                conf_change.append([0, 1])
+                conf_change.append([0, 0, 1])
         boxes, labels, max_conf = self.decode(loc, torch.Tensor(conf_change), False)
         print(boxes, labels, max_conf)
 
@@ -251,8 +257,8 @@ class DataEncoder:
         print('conf', conf.size(), conf)
         conf[iou < threshold] = 0           # iou小的设为背景， 0为背景
         print('conf', conf.size(), conf)
-        conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
-        print('conf', conf.size(), conf)
+        # conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
+        # print('conf', conf.size(), conf)
                                             # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
                                             # 做的宽度为0，但是没有被滤掉，是因为max(1)必须为每一个object选择一个
                                             # 与之对应的default_box，需要修改数据集里的label。
