@@ -204,7 +204,7 @@ def parse_argvs():
     parser.add_argument('--test_path', type=str, help='test dataset path',
                         default='../../Data/yolo/yolo_data_new/car_detect_train/')
 
-    parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')
+    parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect_multi.pt')
     parser.add_argument('--batch_size', type=int, help='batch size', default=16)
     parser.add_argument('--img_size', type=int, help='img size', default=1024)
     parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
