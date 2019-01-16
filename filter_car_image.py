@@ -99,10 +99,10 @@ if __name__ == '__main__':
     # image_dir_1 = "../capture_image/province_nosign/failed_detect/"
     # image_dir_2 = "../capture_image/province_nosign/failed_detect_routh/"
 
-    image_dir_1 = "../capture_image/all_99.6926_nosign/failed_recognize/"
-    image_dir_2 = "../capture_image/all_99.6926_nosign/failed_recognize_routh/"
-    # image_dir_1 = "../capture_image/all_99.6926_nosign/failed_detect/"
-    # image_dir_2 = "../capture_image/all_99.6926_nosign/failed_detect_routh/"
+    # image_dir_1 = "../capture_image/998385_no_0116_multi/failed_recognize/"
+    # image_dir_2 = "../capture_image/998385_no_0116_multi/failed_recognize_routh/"
+    image_dir_1 = "../capture_image/998385_no_0116_multi/failed_detect/"
+    image_dir_2 = "../capture_image/998385_no_0116_multi/failed_detect_routh/"
 
     output_dir = "./Data/"
 
