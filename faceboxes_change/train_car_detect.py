@@ -208,7 +208,7 @@ def parse_argvs():
     parser.add_argument('--batch_size', type=int, help='batch size', default=16)
     parser.add_argument('--img_size', type=int, help='img size', default=1024)
     parser.add_argument('--lr', type=float, help='learning rate', default=0.001)
-    parser.add_argument('--nms_threshold', type=float, help='learning rate', default=0.0)
+    parser.add_argument('--nms_threshold', type=float, help='nms_threshold', default=0.4)
     parser.add_argument('--cuda', type=bool, help='use gpu', default=True)
 
     input_args = parser.parse_args()
