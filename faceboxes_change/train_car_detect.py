@@ -18,11 +18,11 @@ from argparse import ArgumentParser
 
 
 def show_img(img, boxes):
-    print(img.size())
+    print('boxes', boxes)
     # img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
     img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2RGBA)
     h, w, c = img.shape
-    print(h, w, c)
+    print('h, w, c', h, w, c)
     for i in range(len(boxes)):
         box = boxes[i]
         print('box', box)
