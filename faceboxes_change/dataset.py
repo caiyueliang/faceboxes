@@ -113,10 +113,10 @@ class ListDataset(data.Dataset):
         # print('random_crop', boxes, labels)
         h, w, _ = img.shape
 
-        show_img = img.copy()
-        for box in boxes:
-            cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
-        cv2.imshow('old_image', show_img)
+        # show_img = img.copy()
+        # for box in boxes:
+        #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+        # cv2.imshow('old_image', show_img)
         # cv2.waitKey(0)
 
         x1 = boxes[:, 0]
@@ -173,11 +173,11 @@ class ListDataset(data.Dataset):
         boxes[:, 3] = y2    # 第4列表示：h（比例）
         # print('new labels', labels)
 
-        show_img = img.copy()
-        for box in boxes:
-            cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
-        cv2.imshow('new_image', show_img)
-        cv2.waitKey(0)
+        # show_img = img.copy()
+        # for box in boxes:
+        #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+        # cv2.imshow('new_image', show_img)
+        # cv2.waitKey(0)
 
         return img, boxes, labels
 
