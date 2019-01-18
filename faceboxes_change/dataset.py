@@ -108,142 +108,165 @@ class ListDataset(data.Dataset):
             return im_lr, boxes
         return im, boxes
 
-    # 随机裁剪
-    def random_crop(self, img, boxes, labels, prob=0.8):
-        # print('random_crop', boxes, labels)
-        h, w, _ = img.shape
+    # # 随机裁剪
+    # def random_crop(self, img, boxes, labels, prob=0.8):
+    #     # print('random_crop', boxes, labels)
+    #     h, w, _ = img.shape
+    #
+    #     # show_img = img.copy()
+    #     # for box in boxes:
+    #     #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+    #     # cv2.imshow('old_image', show_img)
+    #     # cv2.waitKey(0)
+    #
+    #     x1 = boxes[:, 0]
+    #     y1 = boxes[:, 1]
+    #     x2 = boxes[:, 2]
+    #     y2 = boxes[:, 3]
+    #     # print('x1, y1, x2, y2', x1, y1, x2, y2)
+    #
+    #     min_left = min(min(x1), min(x2))
+    #     min_top = min(min(y1), min(y2))
+    #     min_lt = min(min_left, min_top)
+    #
+    #     min_right = w - max(max(x1), max(x2))
+    #     min_bottom = h - max(max(y1), max(y2))
+    #     min_rb = min(min_right, min_bottom)
+    #     # print('min_left, min_top, min_right, min_bottom', min_left, min_top, min_right, min_bottom)
+    #
+    #     crop_left = 0
+    #     crop_top = 0
+    #     crop_right = w
+    #     crop_bottom = h
+    #
+    #     # random crop left and top
+    #     if random.random() < prob:
+    #         rate = random.random()
+    #         crop = int(min_lt * rate)
+    #
+    #         x1 = x1 - crop
+    #         x2 = x2 - crop
+    #         crop_left = crop
+    #         # print('crop_left', crop_left, rate, x1, x2)
+    #
+    #         y1 = y1 - crop
+    #         y2 = y2 - crop
+    #         crop_top = crop
+    #         # print('crop_top', crop_top, rate, y1, y2)
+    #
+    #     # random crop right
+    #     if random.random() < prob:
+    #         rate = random.random()
+    #         crop = int(min_rb * rate)
+    #
+    #         crop_right = crop_right - crop
+    #         # print('crop_right', crop_right, rate)
+    #
+    #         crop_bottom = crop_bottom - crop
+    #         # print('crop_bottom', crop_bottom, rate)
+    #
+    #     img = img[crop_top:crop_bottom, crop_left:crop_right]
+    #
+    #     boxes[:, 0] = x1    # 第1列表示：x轴中心点（比例） # 第0列表示：类别
+    #     boxes[:, 1] = y1    # 第2列表示：y轴中心点（比例）
+    #     boxes[:, 2] = x2    # 第3列表示：w（比例）
+    #     boxes[:, 3] = y2    # 第4列表示：h（比例）
+    #     # print('new labels', labels)
+    #
+    #     # show_img = img.copy()
+    #     # for box in boxes:
+    #     #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+    #     # cv2.imshow('new_image', show_img)
+    #     # cv2.waitKey(0)
+    #
+    #     return img, boxes, labels
 
-        # show_img = img.copy()
+    # 随机裁剪
+    def random_crop(self, im, boxes, labels):
+        cv2.imshow('old_image', im)
+        print('random_crop', boxes, labels)
+
+        # show_img = im.copy()
         # for box in boxes:
         #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
         # cv2.imshow('old_image', show_img)
-        # cv2.waitKey(0)
 
-        x1 = boxes[:, 0]
-        y1 = boxes[:, 1]
-        x2 = boxes[:, 2]
-        y2 = boxes[:, 3]
-        # print('x1, y1, x2, y2', x1, y1, x2, y2)
+        imh, imw, _ = im.shape
+        short_size = min(imw, imh)
+        # print(imh, imw, short_size)
+        while True:
+            mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
+            print('mode', mode)
+            if mode is None:
+                boxes_uniform = boxes / torch.Tensor([imw, imh, imw, imh]).expand_as(boxes)
+                boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
+                mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
+                if not mask.any():
+                    print('default image have none box bigger than small_threshold')
+                    im, boxes, labels = self.random_getim()
+                    imh, imw, _ = im.shape
+                    short_size = min(imw, imh)
+                    continue
+                selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
+                selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
 
-        min_left = min(min(x1), min(x2))
-        min_top = min(min(y1), min(y2))
-        min_lt = min(min_left, min_top)
+                # show_img = im.copy()
+                # for box in selected_boxes:
+                #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+                # cv2.imshow('new_image', show_img)
+                # cv2.waitKey(0)
 
-        min_right = w - max(max(x1), max(x2))
-        min_bottom = h - max(max(y1), max(y2))
-        min_rb = min(min_right, min_bottom)
-        # print('min_left, min_top, min_right, min_bottom', min_left, min_top, min_right, min_bottom)
+                return im, selected_boxes, selected_labels
 
-        crop_left = 0
-        crop_top = 0
-        crop_right = w
-        crop_bottom = h
+            for _ in range(10):
+                # rate = random.choice([, 0.3, 0.5, 0.7, 0.9])
+                w = random.randrange(int(mode*short_size), short_size)
+                h = w
 
-        # random crop left and top
-        if random.random() < prob:
-            rate = random.random()
-            crop = int(min_lt * rate)
+                x = random.randrange(imw - w)
+                y = random.randrange(imh - h)
+                roi = torch.Tensor([[x, y, x+w, y+h]])
 
-            x1 = x1 - crop
-            x2 = x2 - crop
-            crop_left = crop
-            # print('crop_left', crop_left, rate, x1, x2)
+                center = (boxes[:, :2] + boxes[:, 2:]) / 2
+                roi2 = roi.expand(len(center), 4)
+                mask = (center > roi2[:, :2]) & (center < roi2[:, 2:])
+                mask = mask[:, 0] & mask[:, 1]
+                if not mask.any():
+                    continue
 
-            y1 = y1 - crop
-            y2 = y2 - crop
-            crop_top = crop
-            # print('crop_top', crop_top, rate, y1, y2)
+                selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
+                img = im[y:y+h, x:x+w, :]
+                selected_boxes[:, 0].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 1].add_(-y).clamp_(min=0, max=h)
+                selected_boxes[:, 2].add_(-x).clamp_(min=0, max=w)
+                selected_boxes[:, 3].add_(-y).clamp_(min=0, max=h)
+                # print('croped')
 
-        # random crop right
-        if random.random() < prob:
-            rate = random.random()
-            crop = int(min_rb * rate)
+                boxes_uniform = selected_boxes / torch.Tensor([w, h, w, h]).expand_as(selected_boxes)
+                print('boxes_uniform', boxes_uniform)
+                boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
+                print('boxwh', boxwh)
+                mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
+                print('mask', mask)
 
-            crop_right = crop_right - crop
-            # print('crop_right', crop_right, rate)
+                if not mask.any():
+                    print('crop image have none box bigger than small_threshold')
+                    im, boxes, labels = self.random_getim()
+                    imh, imw, _ = im.shape
+                    short_size = min(imw, imh)
+                    continue
+                selected_boxes_selected = selected_boxes.index_select(0, mask.nonzero().squeeze(1))
+                selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
+                print('selected_boxes_selected', selected_boxes_selected)
+                print('selected_labels', selected_labels)
 
-            crop_bottom = crop_bottom - crop
-            # print('crop_bottom', crop_bottom, rate)
+                # show_img = img.copy()
+                # for box in selected_boxes_selected:
+                #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
+                # cv2.imshow('new_image', show_img)
+                # cv2.waitKey(0)
 
-        img = img[crop_top:crop_bottom, crop_left:crop_right]
-
-        boxes[:, 0] = x1    # 第1列表示：x轴中心点（比例） # 第0列表示：类别
-        boxes[:, 1] = y1    # 第2列表示：y轴中心点（比例）
-        boxes[:, 2] = x2    # 第3列表示：w（比例）
-        boxes[:, 3] = y2    # 第4列表示：h（比例）
-        # print('new labels', labels)
-
-        # show_img = img.copy()
-        # for box in boxes:
-        #     cv2.rectangle(show_img, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0))
-        # cv2.imshow('new_image', show_img)
-        # cv2.waitKey(0)
-
-        return img, boxes, labels
-
-    # # 随机裁剪
-    # def random_crop(self, im, boxes, labels):
-    #     cv2.imshow('old_image', im)
-    #     print('random_crop', boxes, labels)
-    #
-    #     imh, imw, _ = im.shape
-    #     short_size = min(imw, imh)
-    #     # print(imh, imw, short_size)
-    #     while True:
-    #         mode = random.choice([None, 0.3, 0.5, 0.7, 0.9])
-    #         if mode is None:
-    #             boxes_uniform = boxes / torch.Tensor([imw, imh, imw, imh]).expand_as(boxes)
-    #             boxwh = boxes_uniform[:, 2:] - boxes_uniform[:, :2]
-    #             mask = (boxwh[:, 0] > self.small_threshold) & (boxwh[:, 1] > self.small_threshold)
-    #             if not mask.any():
-    #                 print('default image have none box bigger than small_threshold')
-    #                 im, boxes, labels = self.random_getim()
-    #                 imh, imw, _ = im.shape
-    #                 short_size = min(imw, imh)
-    #                 continue
-    #             selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
-    #             selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
-    #             return im, selected_boxes, selected_labels
-    #
-    #         for _ in range(10):
-    #             w = random.randrange(int(0.3*short_size), short_size)
-    #             h = w
-    #
-    #             x = random.randrange(imw - w)
-    #             y = random.randrange(imh - h)
-    #             roi = torch.Tensor([[x, y, x+w, y+h]])
-    #
-    #             center = (boxes[:,:2] + boxes[:,2:]) / 2
-    #             roi2 = roi.expand(len(center), 4)
-    #             mask = (center > roi2[:,:2]) & (center < roi2[:,2:])
-    #             mask = mask[:,0] & mask[:,1]
-    #             if not mask.any():
-    #                 continue
-    #
-    #             selected_boxes = boxes.index_select(0, mask.nonzero().squeeze(1))
-    #             img = im[y:y+h, x:x+w, :]
-    #             selected_boxes[:, 0].add_(-x).clamp_(min=0, max=w)
-    #             selected_boxes[:, 1].add_(-y).clamp_(min=0, max=h)
-    #             selected_boxes[:, 2].add_(-x).clamp_(min=0, max=w)
-    #             selected_boxes[:, 3].add_(-y).clamp_(min=0, max=h)
-    #             # print('croped')
-    #
-    #             boxes_uniform = selected_boxes / torch.Tensor([w,h,w,h]).expand_as(selected_boxes)
-    #             boxwh = boxes_uniform[:,2:] - boxes_uniform[:,:2]
-    #             mask = (boxwh[:,0] > self.small_threshold) & (boxwh[:,1] > self.small_threshold)
-    #             if not mask.any():
-    #                 print('crop image have none box bigger than small_threshold')
-    #                 im, boxes, labels = self.random_getim()
-    #                 imh, imw, _ = im.shape
-    #                 short_size = min(imw, imh)
-    #                 continue
-    #             selected_boxes_selected = selected_boxes.index_select(0, mask.nonzero().squeeze(1))
-    #             selected_labels = labels.index_select(0, mask.nonzero().squeeze(1))
-    #
-    #             cv2.imshow('new_image', img)
-    #             cv2.waitKey(0)
-    #
-    #             return img, selected_boxes_selected, selected_labels
+                return img, selected_boxes_selected, selected_labels
 
     # 随机调亮
     def random_bright(self, im, delta=16):
