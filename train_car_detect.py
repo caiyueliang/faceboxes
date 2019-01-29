@@ -203,7 +203,7 @@ def parse_argvs():
     # parser.add_argument('--train_path', type=str, help='train path', default='../Data/car_rough_detect/car_detect_train/')
     # parser.add_argument('--test_path', type=str, help='test path', default='../Data/car_rough_detect/car_detect_test/')
     parser.add_argument('--train_path', type=str, help='train path', default='../Data/yolo/yolo_data_new/car_detect_train/')
-    parser.add_argument('--test_path', type=str, help='test path', default='../Data/yolo/yolo_data_new/car_detect_test/')
+    parser.add_argument('--test_path', type=str, help='test path', default='../Data/yolo/yolo_data_new/car_detect_train/')
     parser.add_argument('--label_name', type=str, help='label_name', default='plate_label.txt')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect.pt')

@@ -22,7 +22,7 @@ class ListDataset(data.Dataset):
     image_size = 1024
 
     def __init__(self, root, list_file, train, transform):
-        print('data init')
+        # print('data init')
         self.root = root
         self.train = train
         self.transform = transform
