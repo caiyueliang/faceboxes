@@ -50,7 +50,7 @@ class MultiBoxLoss(nn.Module):
         conf_targets    [batch, 21842]
         '''
         batch_size, num_boxes, _ = loc_preds.size()
-        print('batch_size', batch_size, 'num_boxes', num_boxes)
+        # print('batch_size', batch_size, 'num_boxes', num_boxes)
 
         # print('ok1')
         pos = conf_targets > 0 										# 大于0的地方，说明匹配到了人脸框. pos size: (-1, 21842)

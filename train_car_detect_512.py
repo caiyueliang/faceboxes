@@ -33,10 +33,11 @@ def show_img(img, boxes):
 
 
 class ModuleTrain:
-    def __init__(self, train_path, test_path, model_file, model, img_size=512, batch_size=16, lr=1e-3,
+    def __init__(self, train_path, test_path, label_name, model_file, model, img_size=512, batch_size=16, lr=1e-3,
                  re_train=False, best_loss=2, use_gpu=False, nms_threshold=0.5):
         self.train_path = train_path
         self.test_path = test_path
+        self.label_name = label_name
         self.model_file = model_file
         self.img_size = img_size
         self.batch_size = batch_size
@@ -77,8 +78,8 @@ class ModuleTrain:
         ])
 
         # Dataset
-        train_label = os.path.join(self.train_path, 'car_detect_train_label.txt')
-        test_label = os.path.join(self.test_path, 'car_detect_test_label.txt')
+        train_label = os.path.join(self.train_path, self.label_name)
+        test_label = os.path.join(self.test_path, self.label_name)
         train_dataset = ListDataset(root=self.train_path, list_file=train_label, train=True, transform=self.transform_train,
                                     image_size=self.img_size)
         self.train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
@@ -204,6 +205,9 @@ def parse_argvs():
                         default='../Data/car_rough_detect/car_detect_train/')
     parser.add_argument('--test_path', type=str, help='test dataset path',
                         default='../Data/car_rough_detect/car_detect_test/')
+    # parser.add_argument('--train_path', type=str, help='train path', default='../Data/yolo/yolo_data_new/car_detect_train/')
+    # parser.add_argument('--test_path', type=str, help='test path', default='../Data/yolo/yolo_data_new/car_detect_test/')
+    parser.add_argument('--label_name', type=str, help='label_name', default='plate_label.txt')
 
     parser.add_argument("--output_model_path", type=str, help="output model path", default='./weight/car_rough_detect_512.pt')
     parser.add_argument('--batch_size', type=int, help='batch size', default=16)
@@ -221,7 +225,8 @@ if __name__ == '__main__':
     args = parse_argvs()
 
     model = FaceBox_512()
-    model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path, model_file=args.output_model_path,
+    model_train = ModuleTrain(train_path=args.train_path, test_path=args.test_path,
+                              label_name=args.label_name, model_file=args.output_model_path,
                               model=model, batch_size=args.batch_size, img_size=args.img_size,
                               lr=args.lr, use_gpu=args.cuda, nms_threshold=args.nms_threshold)
 

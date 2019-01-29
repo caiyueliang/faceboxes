@@ -103,8 +103,8 @@ class FaceBox(nn.Module):
         # print('conv4_2', x.size())      # (-1, 256, 8, 8)
         hs.append(x)
 
-        for h in hs:
-            print(h.size())
+        # for h in hs:
+        #     print(h.size())
 
         # hs含有三个矩阵，size分别是： [(-1, 128, 32, 32), (-1, 256, 16, 16), (-1, 256, 8, 8)]
         loc_preds, conf_preds = self.multilbox(hs)

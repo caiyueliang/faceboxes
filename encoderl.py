@@ -46,7 +46,7 @@ class DataEncoder:
                         boxes.append((cx, cy, s*ar, s*ar))
 
         self.default_boxes = torch.Tensor(boxes)
-        print('default_boxes', self.default_boxes.size(), self.default_boxes * 1024)
+        # print('default_boxes', self.default_boxes.size(), self.default_boxes * 1024)
 
     def test_iou(self):
         box1 = torch.Tensor([0, 0, 10, 10])
@@ -67,8 +67,8 @@ class DataEncoder:
 
         N = box1.size(0)
         M = box2.size(0)
-        print(box1.size(), box1)
-        print(box2.size(), box2)
+        # print(box1.size(), box1)
+        # print(box2.size(), box2)
 
         lt = torch.max( # left top
             box1[:, :2].unsqueeze(1).expand(N,M,2),  # [N,2] -> [N,1,2] -> [N,M,2]
@@ -100,8 +100,8 @@ class DataEncoder:
 
         # 测试 encode
         loc, conf = self.encode(boxes, label, threshold=0.35)
-        print('conf', type(conf), conf.size(), conf.long().sum())
-        print('loc', type(loc), loc.size())
+        # print('conf', type(conf), conf.size(), conf.long().sum())
+        # print('loc', type(loc), loc.size())
         # img = cv2.imread('test1.jpg')
         w, h, _ = img.shape
 
@@ -193,13 +193,13 @@ class DataEncoder:
         return:boxes:   (tensor) [num_obj,21824,4]
         '''
         boxes_org = boxes
-        print('boxes', boxes.size(), boxes)
-        print('classes', classes.size(), classes)
+        # print('boxes', boxes.size(), boxes)
+        # print('classes', classes.size(), classes)
 
         default_boxes = self.default_boxes              # [21824, 4]
         num_default_boxes = default_boxes.size(0)       # 21824
         num_obj = boxes.size(0)                         # 人脸个数
-        print('[encode] num_obj', num_obj)
+        # print('[encode] num_obj', num_obj)
 
         # 计算iou,交并比
         iou = self.iou(
@@ -212,27 +212,27 @@ class DataEncoder:
         #             print(i, j, iou_item)
 
         max_iou, max_iou_index = iou.max(1)         # 为boxes中的每一个bounding box（边界框），不管IOU大小，都设置一个与之IOU最大的default_box
-        print('max_iou', max_iou)                   # max_iou, default_box中，IOU最大的值是多少;有几个边界框，就有几个最大值
-        print('max_iou_index', max_iou_index)       # max_iou_index, default_box中，IOU最大的值对应的index;有几个边界框，就有几个索引值
+        # print('max_iou', max_iou)                   # max_iou, default_box中，IOU最大的值是多少;有几个边界框，就有几个最大值
+        # print('max_iou_index', max_iou_index)       # max_iou_index, default_box中，IOU最大的值对应的index;有几个边界框，就有几个索引值
 
         iou, max_index = iou.max(0)                 # 每一个default_boxes对应到与之IOU最大的boxes上的bounding box（边界框）
-        print('iou', iou.size(), iou)
-        print('max_index', max_index.size(), max_index)
+        # print('iou', iou.size(), iou)
+        # print('max_index', max_index.size(), max_index)
 
         # print(max(iou))
         max_index.squeeze_(0)                           # torch.LongTensor 21824
         iou.squeeze_(0)
-        print('max_index', max_index.size(), max_index)
-        print('iou', iou.size(), iou)
+        # print('max_index', max_index.size(), max_index)
+        # print('iou', iou.size(), iou)
 
-        print('max_index[max_iou_index]', max_index[max_iou_index])
-        print("torch.LongTensor(range(num_obj))", torch.LongTensor(range(num_obj)))
+        # print('max_index[max_iou_index]', max_index[max_iou_index])
+        # print("torch.LongTensor(range(num_obj))", torch.LongTensor(range(num_obj)))
         max_index[max_iou_index] = torch.LongTensor(range(num_obj))
-        print('max_index[max_iou_index]', max_index[max_iou_index])
-        print('max_index', max_index.size(), max_index)
+        # print('max_index[max_iou_index]', max_index[max_iou_index])
+        # print('max_index', max_index.size(), max_index)
 
         boxes = boxes[max_index]                        # [21824,4]是图像label
-        print('boxes', boxes.size(), boxes)
+        # print('boxes', boxes.size(), boxes)
 
         variances = [0.1, 0.2]
         cxcy = (boxes[:, :2] + boxes[:, 2:])/2 - default_boxes[:, :2]       # [21824,2]
@@ -251,12 +251,12 @@ class DataEncoder:
             raise BaseException('[my exception] inf error')
 
         loc = torch.cat([cxcy, wh], 1)      # [21824,4]
-        print('loc', loc.size(), loc)
+        # print('loc', loc.size(), loc)
 
         conf = classes[max_index]           # 其实都是1 [21824,]
-        print('conf', conf.size(), conf)
+        # print('conf', conf.size(), conf)
         conf[iou < threshold] = 0           # iou小的设为背景， 0为背景
-        print('conf', conf.size(), conf)
+        # print('conf', conf.size(), conf)
         # conf[max_iou_index] = 1             # 这么设置有问题，loc loss 会导致有inf loss，从而干扰训练，
         # print('conf', conf.size(), conf)
                                             # 去掉后，损失降的更稳定些，是因为widerFace数据集里有的label
