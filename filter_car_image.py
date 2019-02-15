@@ -101,8 +101,8 @@ if __name__ == '__main__':
 
     # image_dir_1 = "../capture_image/998385_no_0116_multi/failed_recognize/"
     # image_dir_2 = "../capture_image/998385_no_0116_multi/failed_recognize_routh/"
-    image_dir_1 = "../capture_image/998385_no_0116_multi/failed_detect/"
-    image_dir_2 = "../capture_image/998385_no_0116_multi/failed_detect_routh/"
+    image_dir_1 = "../capture_image/997736_no_0131_one/failed_detect/"
+    image_dir_2 = "../capture_image/997736_no_0131_one/failed_detect_routh/"
 
     output_dir = "./Data/"
 
