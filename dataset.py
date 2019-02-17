@@ -60,7 +60,6 @@ class ListDataset(data.Dataset):
     def __getitem__(self, idx):
         fname = self.fnames[idx]
 
-        # img = cv2.imread(os.path.join(self.root + fname))
         img = Image.open(os.path.join(self.root + fname))
         img = img.convert('RGB')
         # img.show('old_image')
@@ -76,16 +75,11 @@ class ListDataset(data.Dataset):
             img, boxes, labels = self.random_crop(img, boxes, labels)       # 随机裁剪
             img = self.random_bright(img)                                   # 随机调亮
             # img, boxes = self.random_flip(img, boxes)                     # 随机翻转
-            # boxwh = boxes[:, 2:] - boxes[:, :2]
-            # print('boxwh', boxwh)
 
         # img.show('new_image')
         w, h = img.size
-        # img = cv2.resize(img, (self.image_size, self.image_size))
 
         boxes /= torch.Tensor([w, h, w, h]).expand_as(boxes)                # 位置信息除以宽或高（归一化）
-        # for t in self.transform:
-        #     img = t(img)
         img = self.transform(img)
 
         loc_target, conf_target = self.data_encoder.encode(boxes, labels)   # 对位置标签进行转换
