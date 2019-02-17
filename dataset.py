@@ -8,13 +8,14 @@ import os.path
 
 import random
 import numpy as np
+import common
 
 import time
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageDraw
 import cv2
 
 from encoderl import DataEncoder
@@ -69,6 +70,19 @@ class ListDataset(data.Dataset):
 
         boxes = self.boxes[idx].clone()         # 获取某一张图片对应的位置信息（可能多个）
         labels = self.labels[idx].clone()       # 获取某一张图片对应的类别信息（可能多个）
+
+        # print('boxes', boxes, 'labels', labels)
+        if common.image_ratio_error(img) is True:
+            img = img.resize((img.size[0], img.size[1] * 2))
+            for box in boxes:
+                box[1] = box[1] * 2
+                box[3] = box[3] * 2
+            # print('change boxes', boxes, 'labels', labels)
+            # copy_img = img.copy()
+            # draw = ImageDraw.Draw(copy_img)
+            # for box in boxes:
+            #     draw.rectangle((box[0], box[1], box[2], box[3]), None, '#FF0000')
+            # copy_img.show('new_image_1')
 
         # 图片增广
         if self.train:

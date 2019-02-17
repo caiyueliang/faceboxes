@@ -1,11 +1,23 @@
 # -*- coding: utf-8 -*-
 import os
 
-from PIL import Image
-from PIL import ImageEnhance
 import subprocess
 import numpy as np
 import cv2
+import urllib2
+import traceback
+import logging
+
+from PIL import Image
+from PIL import ImageEnhance
+from PIL import ImageFont
+from PIL import ImageDraw
+from retry import retry
+
+
+# fontC = ImageFont.truetype("../plate_recognize/font/platech.ttf", 14, 0)
+
+logger = logging.getLogger("download")
 
 
 def exe_cmd(cmd):
@@ -31,21 +43,134 @@ def get_img_files(file_dir):
     L = []
     for root, dirs, files in os.walk(file_dir):
         for file in files:
-            if file.endswith(".png") or file.endswith(".jpg"):
+            if file.endswith(".png") or file.endswith(".jpg") or file.endswith(".jepg"):
                 L.append(os.path.join(root, file))      # os.path.join 获取完整路径
     return L
 
 
-# 写数据 flag:'w+'
+# 写数据 flag:'a+':追加 |'w+'
 def write_data(file_name, data, flag):
     with open(file_name, flag) as f:
         f.write(data)
 
 
 # 读数据 flag:'r'
-def read_data(file_name, flag='r'):
+def read_data(file_name, flag):
     with open(file_name, flag) as f:
         return f.read()
+
+
+# =====================================================================================
+# 在图片上绘制车牌框和文本,画4个点
+# def draw_box(image, point, add_text=None, root_coord=(0, 0)):
+#     rect = np.array(point, dtype=np.int32)
+#     for i, point in enumerate(rect):
+#             rect[i][0] -= root_coord[0]
+#             rect[i][1] -= root_coord[1]
+#
+#     draw = ImageDraw.Draw(image)
+#     draw.polygon((rect[0][0], rect[0][1], rect[1][0], rect[1][1], rect[2][0], rect[2][1], rect[3][0], rect[3][1]), None, '#FF0000')
+#
+#     if add_text is not None:
+#         draw.rectangle((rect[0][0] - 1, rect[0][1] - 16, rect[0][0] + 115, rect[0][1]), '#FF0000', '#FF0000')
+#         draw.text((int(rect[0][0] + 1), int(rect[0][1] - 16)), add_text, (255, 255, 255), font=fontC)
+#
+#     # image.show()
+#     return image
+
+# # 在图片上绘制车牌框和文本,画4个点
+# def draw_box(image, point, add_text=None, root_coord=(0, 0)):
+#     rect = np.array(point, dtype=np.int32)
+#     for i, point in enumerate(rect):
+#             rect[i][0] -= root_coord[0]
+#             rect[i][1] -= root_coord[1]
+#
+#     cv2.polylines(image, [rect], True, (0, 0, 255), 2, cv2.LINE_AA)
+#     if add_text is not None:
+#         cv2.rectangle(image, (int(rect[0][0] - 1), int(rect[0][1]) - 16), (int(rect[0][0] + 115), int(rect[0][1])), (0, 0, 255), -1, cv2.LINE_AA)
+#         img = Image.fromarray(image)
+#         draw = ImageDraw.Draw(img)
+#         draw.text((int(rect[0][0] + 1), int(rect[0][1] - 16)), add_text, (255, 255, 255), font=fontC)
+#         imagex = np.array(img)
+#         return imagex
+#
+#     return image
+
+
+# =====================================================================================
+@retry(tries=2, logger=logger)
+def download(url, timeout=2):
+    res = urllib2.urlopen(url, timeout=timeout).read()
+    if "<title>404" in str(res):
+        logger.error("[download] url error 404")
+        logger.error("[download] url: %s" % url)
+        return None
+    if len(res) <= 1024:
+        logger.error("[download] iamge len too small")
+        logger.error("[download] url: %s" % url)
+        return None
+
+    return res
+
+
+def download_image(save_image_name, url):
+    try:
+        res = download(url)
+        # res = urllib2.urlopen(url, timeout=timeout).read()
+        # if "<title>404" in str(res):
+        #     logger.error("[download_image] url error 404")
+        #     return None
+        #
+        # if len(res) <= 1024:
+        #     logger.error("[download_image] iamge len too small")
+        #     return None
+
+        if res is not None:
+            f = open(save_image_name, "wb")
+            f.write(res)
+            f.close()
+    except Exception, e:
+        msg = traceback.format_exc()
+        logger.error("[download_image] Exception Msg: %s" % msg)
+        logger.error("[download_image] url: %s" % url)
+        return None
+
+    return True
+
+
+# 下载url中的图片，返回二进制流图片
+def download_image_binary(url):
+    try:
+        res = download(url)
+        # res = urllib2.urlopen(url, timeout=timeout).read()
+        # if "<title>404" in str(res):
+        #     logger.error("[download_image_binary] url error 404")
+        #     return None
+        #
+        # if len(res) <= 1024:
+        #     logger.error("[download_image_binary] iamge len too small")
+        #     return None
+
+    except Exception, e:
+        msg = traceback.format_exc()
+        logger.error("[download_image_binary] Exception Msg: %s" % msg)
+        logger.error("[download_image_binary] url: %s" % url)
+        return None
+
+    return res
+
+
+# 检测图片比例是否异常
+def image_ratio_error(img, ratio=2):
+    try:
+        w, h = img.size
+        if float(w) / float(h) > ratio:
+            return True
+    except Exception:
+        msg = traceback.format_exc()
+        logger.error(msg)
+        return True
+    return False
 
 
 # =====================================================================================
