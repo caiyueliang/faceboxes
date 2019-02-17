@@ -14,7 +14,7 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-from PIL import Image
+from PIL import Image, ImageEnhance
 import cv2
 
 from encoderl import DataEncoder
@@ -74,7 +74,7 @@ class ListDataset(data.Dataset):
         # 图片增广
         if self.train:
             img, boxes, labels = self.random_crop(img, boxes, labels)       # 随机裁剪
-            # img = self.random_bright(img)                                   # 随机调亮
+            img = self.random_bright(img)                                   # 随机调亮
             # img, boxes = self.random_flip(img, boxes)                     # 随机翻转
             # boxwh = boxes[:, 2:] - boxes[:, :2]
             # print('boxwh', boxwh)
@@ -178,11 +178,17 @@ class ListDataset(data.Dataset):
                 return img, selected_boxes_selected, selected_labels
 
     # 随机调亮
-    def random_bright(self, im, delta=16):
+    # def random_bright(self, im, delta=16):
+    #     alpha = random.random()
+    #     if alpha > 0.3:
+    #         im = im * alpha + random.randrange(-delta, delta)
+    #         im = im.clip(min=0, max=255).astype(np.uint8)
+    #     return im
+    def random_bright(self, im):
         alpha = random.random()
-        if alpha > 0.3:
-            im = im * alpha + random.randrange(-delta, delta)
-            im = im.clip(min=0, max=255).astype(np.uint8)
+        if alpha > 0.1:
+            delta = random.choice([0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4])
+            im = ImageEnhance.Brightness(im).enhance(delta)
         return im
 
     # # 随机裁剪
