@@ -66,13 +66,13 @@ class ModuleTrain:
 
         # RandomHorizontalFlip
         self.transform_train = T.Compose([
-            T.Resize((self.img_size, self.img_size)),
+            # T.Resize((self.img_size, self.img_size)),
             T.ToTensor(),
             # T.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5]),
         ])
 
         self.transform_test = T.Compose([
-            T.Resize((self.img_size, self.img_size)),
+            # T.Resize((self.img_size, self.img_size)),
             T.ToTensor(),
             # T.Normalize(mean=[.5, .5, .5], std=[.5, .5, .5])
         ])
