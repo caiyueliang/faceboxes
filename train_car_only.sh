@@ -1,0 +1,1 @@
+python train_car_detect.py --lr 0.0001 --label_name car_label.txt --output_model_path ./weight/car_rough_detect.pt
