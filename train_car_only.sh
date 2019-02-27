@@ -1,1 +1,1 @@
-python train_car_detect.py --lr 0.0001 --label_name car_label.txt --output_model_path ./weight/car_rough_detect.pt --test_path ../Data/car_rough_detect/car_detect_test/
+python train_car_detect.py --lr 0.0001 --label_name car_label.txt --output_model_path ./weight/car_rough_detect.pt --test_path ../Data/yolo/yolo_data_new/car_detect_train/
