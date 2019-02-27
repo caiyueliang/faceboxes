@@ -45,6 +45,7 @@ class ModuleTrain:
         self.best_loss = best_loss                      # 最好的损失值，小于这个值，才会保存模型
         self.use_gpu = False
         self.nms_threshold = nms_threshold
+        self.lr = lr
 
         if use_gpu is True:
             print("gpu available: %s" % str(torch.cuda.is_available()))
@@ -63,6 +64,8 @@ class ModuleTrain:
         # 加载模型
         if os.path.exists(self.model_file) and not self.re_train:
             self.load(self.model_file)
+        else:
+            self.lr = 0.01
 
         # RandomHorizontalFlip
         self.transform_train = T.Compose([
@@ -89,7 +92,6 @@ class ModuleTrain:
 
         self.criterion = MultiBoxLoss()
 
-        self.lr = lr
         # self.optimizer = optim.SGD(self.model.parameters(), lr=self.lr, momentum=0.5)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=1e-4)
         # optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-4)
