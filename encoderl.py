@@ -9,59 +9,13 @@ import time
 
 
 class DataEncoder:
-    # def __init__(self):
-    #     '''
-    #     compute default boxes
-    #     '''
-    #     scale = 1024.
-    #     steps = [s / scale for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
-    #     sizes = [s / scale for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
-    #     aspect_ratios = ((1, 2, 4), (1,), (1,))
-    #     feature_map_sizes = (32, 16, 8)
-    #
-    #     density = [[-3, -1, 1, 3], [-1, 1], [0]]        # density for output layer1
-    #     # density = [[0],[0],[0]] # density for output layer1
-    #
-    #     num_layers = len(feature_map_sizes)             # 3
-    #     boxes = []
-    #     for i in range(num_layers):                     # 遍历3层中的每一层
-    #         fmsize = feature_map_sizes[i]               # 分别为32, 16, 8
-    #         # print(len(boxes))
-    #         # 生成32×32个，16×16个, 8×8个二元组，如：(0,0), (0,1), (0,2), ... (1,0), (1,1), ..., (32,32)
-    #         for h, w in itertools.product(range(fmsize), repeat=2):
-    #             # print(h, w)
-    #             cx = (w + 0.5)*steps[i]                     # 中心点坐标x
-    #             cy = (h + 0.5)*steps[i]                     # 中心点坐标y
-    #
-    #             s = sizes[i]
-    #             for j, ar in enumerate(aspect_ratios[i]):
-    #                 if i == 0:                          # 第1层加入检测框稠密策略
-    #                     # j = (1, 2, 4)
-    #                     # 16:(-3,-3),(-3,-1),(-3,1),(-3,3),(-1,-3),(-1,-1),(-1,1),(-1,3), ...
-    #                     #  4:(-1,-1),(-1,1),(1,-1),(1,1), ...
-    #                     #  1:(0,0)
-    #                     for dx, dy in itertools.product(density[j], repeat=2):
-    #                         boxes.append((cx+dx/8.*s*ar, cy+dy/8.*s*ar, s*ar, s*ar))
-    #                 else:
-    #                     # j = (1,), (1,)
-    #                     boxes.append((cx, cy, s*ar, s*ar))
-    #
-    #     self.default_boxes = torch.Tensor(boxes)            # default_boxes size [21824, 4]
     def __init__(self):
         '''
         compute default boxes
         '''
-        # x与y要分开统计
-        # start = time.time()
-
-        scale_x = 1024.
-        steps_x = [s / scale_x for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
-        sizes_x = [s / scale_x for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
-
-        scale_y = 1024
-        steps_y = [s / scale_y for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
-        sizes_y = [s / scale_y for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
-
+        scale = 1024.
+        steps = [s / scale for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+        sizes = [s / scale for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
         aspect_ratios = ((1, 2, 4), (1,), (1,))
         feature_map_sizes = (32, 16, 8)
 
@@ -76,11 +30,10 @@ class DataEncoder:
             # 生成32×32个，16×16个, 8×8个二元组，如：(0,0), (0,1), (0,2), ... (1,0), (1,1), ..., (32,32)
             for h, w in itertools.product(range(fmsize), repeat=2):
                 # print(h, w)
-                cx = (w + 0.5) * steps_x[i]             # 中心点坐标x
-                cy = (h + 0.5) * steps_y[i]             # 中心点坐标y
+                cx = (w + 0.5)*steps[i]                     # 中心点坐标x
+                cy = (h + 0.5)*steps[i]                     # 中心点坐标y
 
-                s_x = sizes_x[i]
-                s_y = sizes_y[i]
+                s = sizes[i]
                 for j, ar in enumerate(aspect_ratios[i]):
                     if i == 0:                          # 第1层加入检测框稠密策略
                         # j = (1, 2, 4)
@@ -88,14 +41,69 @@ class DataEncoder:
                         #  4:(-1,-1),(-1,1),(1,-1),(1,1), ...
                         #  1:(0,0)
                         for dx, dy in itertools.product(density[j], repeat=2):
-                            boxes.append((cx+dx/8.*s_x*ar, cy+dy/8.*s_y*ar, s_x*ar, s_y*ar))
+                            boxes.append((cx+dx/8.*s*ar, cy+dy/8.*s*ar, s*ar, s*ar))
                     else:
                         # j = (1,), (1,)
-                        boxes.append((cx, cy, s_x*ar, s_y*ar))
+                        boxes.append((cx, cy, s*ar, s*ar))
 
         self.default_boxes = torch.Tensor(boxes)            # default_boxes size [21824, 4]
-
-        # print('time', time.time() - start)
+    # def __init__(self):
+    #     '''
+    #     compute default boxes
+    #     '''
+    #     # x轴与y轴要分开
+    #     w = 1280.
+    #     w_scale = (40, 80, 160)
+    #     h = 720.
+    #     h_scale = (23, 60, 120)
+    #
+    #     scale_x = w
+    #     steps_x = [s / scale_x for s in (w_scale[0], w_scale[1], w_scale[2])]           # [0.03125, 0.0625, 0.125]
+    #     sizes_x = [s / scale_x for s in (w_scale[0], w_scale[1]*4, w_scale[2]*4)]       # [0.03125, 0.25, 0.5]
+    #     scale_y = h
+    #     steps_y = [s / scale_y for s in (h_scale[0], h_scale[1], h_scale[2])]           # [0.03125, 0.0625, 0.125]
+    #     sizes_y = [s / scale_y for s in (h_scale[0], h_scale[1]*4, h_scale[2]*4)]       # [0.03125, 0.25, 0.5]
+    #     aspect_ratios = ((1, 2, 4), (1,), (1,))
+    #     feature_map_sizes = (32, 16, 8)
+    #
+    #     # scale_x = 1024.
+    #     # steps_x = [s / scale_x for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+    #     # sizes_x = [s / scale_x for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
+    #     # scale_y = 1024
+    #     # steps_y = [s / scale_y for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+    #     # sizes_y = [s / scale_y for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
+    #     # aspect_ratios = ((1, 2, 4), (1,), (1,))
+    #     # feature_map_sizes = (32, 16, 8)
+    #
+    #     density = [[-3, -1, 1, 3], [-1, 1], [0]]        # density for output layer1
+    #     # density = [[0],[0],[0]] # density for output layer1
+    #
+    #     num_layers = len(feature_map_sizes)             # 3
+    #     boxes = []
+    #     for i in range(num_layers):                     # 遍历3层中的每一层
+    #         fmsize = feature_map_sizes[i]               # 分别为32, 16, 8
+    #         # print(len(boxes))
+    #         # 生成32×32个，16×16个, 8×8个二元组，如：(0,0), (0,1), (0,2), ... (1,0), (1,1), ..., (32,32)
+    #         for h, w in itertools.product(range(fmsize), repeat=2):
+    #             # print(h, w)
+    #             cx = (w + 0.5) * steps_x[i]             # 中心点坐标x
+    #             cy = (h + 0.5) * steps_y[i]             # 中心点坐标y
+    #
+    #             s_x = sizes_x[i]
+    #             s_y = sizes_y[i]
+    #             for j, ar in enumerate(aspect_ratios[i]):
+    #                 if i == 0:                          # 第1层加入检测框稠密策略
+    #                     # j = (1, 2, 4)
+    #                     # 16:(-3,-3),(-3,-1),(-3,1),(-3,3),(-1,-3),(-1,-1),(-1,1),(-1,3), ...
+    #                     #  4:(-1,-1),(-1,1),(1,-1),(1,1), ...
+    #                     #  1:(0,0)
+    #                     for dx, dy in itertools.product(density[j], repeat=2):
+    #                         boxes.append((cx+dx/8.*s_x*ar, cy+dy/8.*s_y*ar, s_x*ar, s_y*ar))
+    #                 else:                                # 第2，3层保持正常
+    #                     # j = (1,), (1,)
+    #                     boxes.append((cx, cy, s_x*ar, s_y*ar))
+    #
+    #     self.default_boxes = torch.Tensor(boxes)            # default_boxes size [21824, 4]
 
     def test_iou(self):
         box1 = torch.Tensor([0, 0, 10, 10])
@@ -141,6 +149,110 @@ class DataEncoder:
         iou = inter / (area1 + area2 - inter)
         return iou
 
+    # def test_encode(self, boxes, img, label):
+    #     # box = torch.Tensor([ 0.4003,0.0000,0.8409,0.4295])
+    #     # box = box[None,:]
+    #     # label = torch.LongTensor([1])
+    #     # label = label[None,:]
+    #
+    #     # 标签类别信息转换成矩阵输出: loc [21824,4], conf [21824,2]
+    #     loc, conf = self.encode(boxes, label, threshold=0.35)
+    #     # print('conf', type(conf), conf.size(), conf.long().sum())
+    #     # print('loc', type(loc), loc.size())
+    #     # img = cv2.imread('test1.jpg')
+    #     h, w, _ = img.shape
+    #     print('h, w, _', h, w, _)
+    #     # 画输入的boxes,
+    #     for box in boxes:
+    #         cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #
+    #     # print(type(conf))
+    #     for i in range(len(self.default_boxes)):
+    #         if conf[i] != 0:
+    #             print(i, conf[i])
+    #
+    #     im = img.copy()
+    #     # for i in range(42):
+    #     #     print(self.default_boxes[i]*w)
+    #
+    #     for i in range(32*32*21):
+    #         # box_item = self.default_boxes[i]*w
+    #         box_item = self.default_boxes[i]
+    #         box_item[0] = box_item[0] * w
+    #         box_item[1] = box_item[1] * h
+    #         box_item[2] = box_item[2] * w
+    #         box_item[3] = box_item[3] * h
+    #         # print(box_item)
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 1, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[0]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     box = self.default_boxes[16]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     box = self.default_boxes[20]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_0.jpg', im)
+    #
+    #     im = img.copy()
+    #     for i in range(32*32*21, 32*32*21+16*16):
+    #         box_item = self.default_boxes[i]
+    #         box_item[0] = box_item[0] * w
+    #         box_item[1] = box_item[1] * h
+    #         box_item[2] = box_item[2] * w
+    #         box_item[3] = box_item[3] * h
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[32*32*21]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*w)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_1.jpg', im)
+    #
+    #     im = img.copy()
+    #     for i in range(32*32*21+16*16, len(self.default_boxes)):
+    #         box_item = self.default_boxes[i]
+    #         box_item[0] = box_item[0] * w
+    #         box_item[1] = box_item[1] * h
+    #         box_item[2] = box_item[2] * w
+    #         box_item[3] = box_item[3] * h
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[32*32*21+16*16]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*w)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_2.jpg', im)
+    #
+    #     # 测试 decode
+    #     conf_change = []
+    #     for c in conf:
+    #         if c == 0:
+    #             conf_change.append([1, 0, 0])
+    #         elif c == 1:
+    #             conf_change.append([0, 1, 0])
+    #         else:
+    #             conf_change.append([0, 0, 1])
+    #
+    #     # 矩阵输出(loc[21824,4], conf[21824,2])转换成标签类别信息
+    #     boxes, labels, max_conf = self.decode(loc, torch.Tensor(conf_change), False)
+    #     print(boxes, labels, max_conf)
+    #
+    #     im = img.copy()
+    #     for box in boxes:
+    #         cv2.rectangle(im, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (255, 255, 0))
+    #     cv2.imwrite('test_encoder_3.jpg', im)
+
     def test_encode(self, boxes, img, label):
         # box = torch.Tensor([ 0.4003,0.0000,0.8409,0.4295])
         # box = box[None,:]
@@ -152,7 +264,7 @@ class DataEncoder:
         # print('conf', type(conf), conf.size(), conf.long().sum())
         # print('loc', type(loc), loc.size())
         # img = cv2.imread('test1.jpg')
-        w, h, _ = img.shape
+        h, w, _ = img.shape
 
         # 画输入的boxes,
         for box in boxes:
