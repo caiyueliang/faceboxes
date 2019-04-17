@@ -5,6 +5,7 @@ import math
 import itertools
 import cv2
 import numpy as np
+import time
 
 
 class DataEncoder:
@@ -50,9 +51,17 @@ class DataEncoder:
         '''
         compute default boxes
         '''
-        scale = 1024.
-        steps = [s / scale for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
-        sizes = [s / scale for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
+        # x与y要分开统计
+        # start = time.time()
+
+        scale_x = 1024.
+        steps_x = [s / scale_x for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+        sizes_x = [s / scale_x for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
+
+        scale_y = 1024
+        steps_y = [s / scale_y for s in (32, 64, 128)]      # [0.03125, 0.0625, 0.125]
+        sizes_y = [s / scale_y for s in (32, 256, 512)]     # [0.03125, 0.25, 0.5]     当32改为64时，achor与label匹配的正样本数目更多
+
         aspect_ratios = ((1, 2, 4), (1,), (1,))
         feature_map_sizes = (32, 16, 8)
 
@@ -67,10 +76,11 @@ class DataEncoder:
             # 生成32×32个，16×16个, 8×8个二元组，如：(0,0), (0,1), (0,2), ... (1,0), (1,1), ..., (32,32)
             for h, w in itertools.product(range(fmsize), repeat=2):
                 # print(h, w)
-                cx = (w + 0.5)*steps[i]                     # 中心点坐标x
-                cy = (h + 0.5)*steps[i]                     # 中心点坐标y
+                cx = (w + 0.5) * steps_x[i]             # 中心点坐标x
+                cy = (h + 0.5) * steps_y[i]             # 中心点坐标y
 
-                s = sizes[i]
+                s_x = sizes_x[i]
+                s_y = sizes_y[i]
                 for j, ar in enumerate(aspect_ratios[i]):
                     if i == 0:                          # 第1层加入检测框稠密策略
                         # j = (1, 2, 4)
@@ -78,12 +88,14 @@ class DataEncoder:
                         #  4:(-1,-1),(-1,1),(1,-1),(1,1), ...
                         #  1:(0,0)
                         for dx, dy in itertools.product(density[j], repeat=2):
-                            boxes.append((cx+dx/8.*s*ar, cy+dy/8.*s*ar, s*ar, s*ar))
+                            boxes.append((cx+dx/8.*s_x*ar, cy+dy/8.*s_y*ar, s_x*ar, s_y*ar))
                     else:
                         # j = (1,), (1,)
-                        boxes.append((cx, cy, s*ar, s*ar))
+                        boxes.append((cx, cy, s_x*ar, s_y*ar))
 
         self.default_boxes = torch.Tensor(boxes)            # default_boxes size [21824, 4]
+
+        # print('time', time.time() - start)
 
     def test_iou(self):
         box1 = torch.Tensor([0, 0, 10, 10])
@@ -394,8 +406,10 @@ if __name__ == '__main__':
 
     img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
     h, w, _ = img.shape
-    # img = cv2.resize(img, (1024, 1024))
-    img = cv2.resize(img, (1280, 720))
+    # start = time.time()
+    img = cv2.resize(img, (1024, 1024))
+    # img = cv2.resize(img, (1280, 720))
+    # print('time', time.time() - start)
     dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
 
     # img = cv2.imread("Data/557831_蓝_粤YXU501.jpg")
