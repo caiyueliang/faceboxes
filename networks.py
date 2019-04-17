@@ -51,7 +51,7 @@ class FaceBox(nn.Module):
     def __init__(self):
         super(FaceBox, self).__init__()
 
-        #model
+        # model
         self.conv1 = nn.Conv2d(3, 24, kernel_size=7, stride=4, padding=3)
         self.conv2 = nn.Conv2d(48, 64, kernel_size=5, stride=2, padding=2)
 
@@ -68,39 +68,42 @@ class FaceBox(nn.Module):
 
     def forward(self, x):
         hs = []
+        print('input', x.size())
 
         x = self.conv1(x)
-        # print('conv1', x.size())
+        print('conv1', x.size())
         x = torch.cat((F.relu(x), F.relu(-x)), 1)
-        # print('CReLu', x.size())
+        print('CReLu', x.size())
         x = F.max_pool2d(x, kernel_size=3, stride=2, padding=1)
-        # print('max_pool2d', x.size())
+        print('max_pool2d', x.size())
 
         x = self.conv2(x)
-        # print('conv2', x.size())
+        print('conv2', x.size())
         x = torch.cat((F.relu(x), F.relu(-x)), 1)
-        # print('CReLu', x.size())
+        print('CReLu', x.size())
         x = F.max_pool2d(x, kernel_size=3, stride=2, padding=1)
-        # print('max_pool2d', x.size())   # (-1, 128, 32, 32)
+        print('max_pool2d', x.size())   # (-1, 128, 32, 32)
 
         x = self.inception1(x)
-        # print('inception1', x.size())   # (-1, 128, 32, 32)
+        print('inception1', x.size())   # (-1, 128, 32, 32)
         x = self.inception2(x)
-        # print('inception2', x.size())   # (-1, 128, 32, 32)
+        print('inception2', x.size())   # (-1, 128, 32, 32)
         x = self.inception3(x)
-        # print('inception3', x.size())   # (-1, 128, 32, 32)
+        print('inception3', x.size())   # (-1, 128, 32, 32)
         hs.append(x)
 
+        print('===============================================')
         x = self.conv3_1(x)
-        # print('conv3_1', x.size())      # (-1, 128, 32, 32)
+        print('conv3_1', x.size())      # (-1, 128, 32, 32)
         x = self.conv3_2(x)
-        # print('conv3_2', x.size())      # (-1, 256, 16, 16)
+        print('conv3_2', x.size())      # (-1, 256, 16, 16)
         hs.append(x)
 
+        print('===============================================')
         x = self.conv4_1(x)
-        # print('conv4_1', x.size())      # (-1, 128, 16, 16)
+        print('conv4_1', x.size())      # (-1, 128, 16, 16)
         x = self.conv4_2(x)
-        # print('conv4_2', x.size())      # (-1, 256, 8, 8)
+        print('conv4_2', x.size())      # (-1, 256, 8, 8)
         hs.append(x)
 
         # for h in hs:
@@ -114,7 +117,8 @@ class FaceBox(nn.Module):
 
 if __name__ == '__main__':
     model = FaceBox()
-    data = Variable(torch.randn(1, 3, 1024, 1024))
+    # data = Variable(torch.randn(1, 3, 1024, 1024))
+    data = Variable(torch.randn(1, 3, 1280, 720))
     start = time.time()
     loc, conf = model(data)
     end = time.time()

@@ -1,0 +1,42 @@
+input torch.Size([1, 3, 1024, 1024])
+conv1 torch.Size([1, 24, 256, 256])
+CReLu torch.Size([1, 48, 256, 256])
+max_pool2d torch.Size([1, 48, 128, 128])
+conv2 torch.Size([1, 64, 64, 64])
+CReLu torch.Size([1, 128, 64, 64])
+max_pool2d torch.Size([1, 128, 32, 32])
+inception1 torch.Size([1, 128, 32, 32])
+inception2 torch.Size([1, 128, 32, 32])
+inception3 torch.Size([1, 128, 32, 32]) --> 进入multibox_layer --> [1, 84, 32, 32] --> [1, 21504, 4]  21504 = 32 * 32 *21
+===============================================
+conv3_1 torch.Size([1, 128, 32, 32])
+conv3_2 torch.Size([1, 256, 16, 16])    --> 进入multibox_layer --> [1, 4, 16, 16]  --> [1, 256, 4]    256 = 16 * 16 * 1
+===============================================
+conv4_1 torch.Size([1, 128, 16, 16])
+conv4_2 torch.Size([1, 256, 8, 8])      --> 进入multibox_layer --> [1, 4, 8, 8]    --> [1, 64, 4]     64 = 8 * 8 * 1
+
+loc torch.Size([1, 21824, 4])			--> 21824 = 21504 + 256 + 64
+conf torch.Size([1, 21824, 2])
+time: 0.054500
+
+
+input torch.Size([1, 3, 1280, 720])
+conv1 torch.Size([1, 24, 320, 180])
+CReLu torch.Size([1, 48, 320, 180])
+max_pool2d torch.Size([1, 48, 160, 90])
+conv2 torch.Size([1, 64, 80, 45])
+CReLu torch.Size([1, 128, 80, 45])
+max_pool2d torch.Size([1, 128, 40, 23])
+inception1 torch.Size([1, 128, 40, 23])
+inception2 torch.Size([1, 128, 40, 23])
+inception3 torch.Size([1, 128, 40, 23]) --> 进入multibox_layer --> [1, 84, 40, 23] --> [1, 19320, 4]  19320 = 40 * 23 *21
+===============================================
+conv3_1 torch.Size([1, 128, 40, 23])
+conv3_2 torch.Size([1, 256, 20, 12])    --> 进入multibox_layer --> [1, 4, 20, 12]  --> [1, 240, 4]    240 = 20 * 12 * 1  
+===============================================
+conv4_1 torch.Size([1, 128, 20, 12])
+conv4_2 torch.Size([1, 256, 10, 6])     --> 进入multibox_layer --> [1, 4, 10, 6]    --> [1, 60, 4]     60 = 10 * 6 * 1
+
+loc torch.Size([1, 19620, 4])           --> 19620 = 19320 + 240 + 60
+conf torch.Size([1, 19620, 2])
+time: 0.051305

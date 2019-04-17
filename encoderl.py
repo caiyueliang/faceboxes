@@ -98,14 +98,14 @@ class DataEncoder:
         # label = torch.LongTensor([1])
         # label = label[None,:]
 
-        # 测试 encode
+        # 标签类别信息转换成矩阵输出: loc [21824,4], conf [21824,2]
         loc, conf = self.encode(boxes, label, threshold=0.35)
         # print('conf', type(conf), conf.size(), conf.long().sum())
         # print('loc', type(loc), loc.size())
         # img = cv2.imread('test1.jpg')
         w, h, _ = img.shape
 
-        # 画输入的boxes
+        # 画输入的boxes,
         for box in boxes:
             cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
 
@@ -164,10 +164,6 @@ class DataEncoder:
         cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*w)), (0, 255, 0))
         cv2.imwrite('test_encoder_2.jpg', im)
 
-        # for i in range(conf.size(0)):
-            # if conf[i].numpy != 0:
-                # print()
-
         # 测试 decode
         conf_change = []
         for c in conf:
@@ -177,6 +173,8 @@ class DataEncoder:
                 conf_change.append([0, 1, 0])
             else:
                 conf_change.append([0, 0, 1])
+
+        # 矩阵输出(loc[21824,4], conf[21824,2])转换成标签类别信息
         boxes, labels, max_conf = self.decode(loc, torch.Tensor(conf_change), False)
         print(boxes, labels, max_conf)
 
@@ -184,6 +182,98 @@ class DataEncoder:
         for box in boxes:
             cv2.rectangle(im, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (255, 255, 0))
         cv2.imwrite('test_encoder_3.jpg', im)
+    # def test_encode(self, boxes, img, label):
+    #     # box = torch.Tensor([ 0.4003,0.0000,0.8409,0.4295])
+    #     # box = box[None,:]
+    #     # label = torch.LongTensor([1])
+    #     # label = label[None,:]
+    #
+    #     # 测试 encode
+    #     loc, conf = self.encode(boxes, label, threshold=0.35)
+    #     # print('conf', type(conf), conf.size(), conf.long().sum())
+    #     # print('loc', type(loc), loc.size())
+    #     # img = cv2.imread('test1.jpg')
+    #     w, h, _ = img.shape
+    #
+    #     # 画输入的boxes
+    #     for box in boxes:
+    #         cv2.rectangle(img, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #
+    #     # print(type(conf))
+    #     for i in range(len(self.default_boxes)):
+    #         if conf[i] != 0:
+    #             print(i, conf[i])
+    #
+    #     im = img.copy()
+    #     # for i in range(42):
+    #     #     print(self.default_boxes[i]*w)
+    #
+    #     for i in range(32*32*21):
+    #         box_item = self.default_boxes[i]*w
+    #         # print(box_item)
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 1, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[0]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     box = self.default_boxes[16]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     box = self.default_boxes[20]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*h)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_0.jpg', im)
+    #
+    #     im = img.copy()
+    #     for i in range(32*32*21, 32*32*21+16*16):
+    #         box_item = self.default_boxes[i]*w
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[32*32*21]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*w)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_1.jpg', im)
+    #
+    #     im = img.copy()
+    #     for i in range(32*32*21+16*16, len(self.default_boxes)):
+    #         box_item = self.default_boxes[i]*w
+    #         centerx, centery = int(box_item[0]), int(box_item[1])
+    #         if conf[i] == 1:
+    #             cv2.circle(im, (centerx, centery), 4, (0, 255, 0))      # 小绿圆，置信度不为0
+    #         elif conf[i] == 2:
+    #             cv2.circle(im, (centerx, centery), 4, (255, 0, 0))      # 小蓝圆，置信度不为0
+    #         else:
+    #             cv2.circle(im, (centerx, centery), 2, (0, 0, 255))      # 小红点
+    #     box = self.default_boxes[32*32*21+16*16]
+    #     cv2.rectangle(im, (0, 0), (int(box[2]*w), int(box[3]*w)), (0, 255, 0))
+    #     cv2.imwrite('test_encoder_2.jpg', im)
+    #
+    #     # for i in range(conf.size(0)):
+    #         # if conf[i].numpy != 0:
+    #             # print()
+    #
+    #     # 测试 decode
+    #     conf_change = []
+    #     for c in conf:
+    #         if c == 0:
+    #             conf_change.append([1, 0, 0])
+    #         elif c == 1:
+    #             conf_change.append([0, 1, 0])
+    #         else:
+    #             conf_change.append([0, 0, 1])
+    #     boxes, labels, max_conf = self.decode(loc, torch.Tensor(conf_change), False)
+    #     print(boxes, labels, max_conf)
+    #
+    #     im = img.copy()
+    #     for box in boxes:
+    #         cv2.rectangle(im, (int(box[0]*w), int(box[1]*h)), (int(box[2]*w), int(box[3]*h)), (255, 255, 0))
+    #     cv2.imwrite('test_encoder_3.jpg', im)
 
     def encode(self, boxes, classes, threshold=0.35):
         '''
@@ -357,23 +447,20 @@ if __name__ == '__main__':
     dataencoder = DataEncoder()
     # dataencoder.test_iou()
 
-    # img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
+    img = cv2.imread("Data/9488513_鄂A578U2_3.jpg")
+    h, w, _ = img.shape
+    # img = cv2.resize(img, (1024, 1024))
+    img = cv2.resize(img, (1280, 720))
+    dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
+
+    # img = cv2.imread("Data/557831_蓝_粤YXU501.jpg")
     # h, w, _ = img.shape
     # img = cv2.resize(img, (1024, 1024))
-    # dataencoder.test_encode(torch.Tensor([[32./w, 266./h, 262./w, 351./h], [455./w, 138./h, 572./w, 179./h]]), img, torch.LongTensor([1, 1]))
-
-    img = cv2.imread("Data/557831_蓝_粤YXU501.jpg")
-    h, w, _ = img.shape
-    img = cv2.resize(img, (1024, 1024))
-    # 12.0 15.0 231.0 110.0 1
-    # 1072.0 591.0 239.0 112.0 1
-    # 1461.0 275.0 94.0 36.0 1
-    # 414.0 5.0 1092.0 818.0 2
-    # 1185.0 16.0 435.0 352.0 2
-    boxes = torch.Tensor([[12. / w, 15. / h, 243. / w, 125. / h],
-                          [1072. / w, 591. / h, 1311. / w, 703. / h],
-                          [1461. / w, 275. / h, 1565. / w, 311. / h],
-                          [414. / w, 5. / h, 1506. / w, 823. / h],
-                          [1185. / w, 16. / h, 1620. / w, 368. / h]])
-    dataencoder.test_encode(boxes, img, torch.LongTensor([1, 1, 1, 2, 2]))
+    # # img = cv2.resize(img, (1280, 720))
+    # boxes = torch.Tensor([[12. / w, 15. / h, 243. / w, 125. / h],
+    #                       [1072. / w, 591. / h, 1311. / w, 703. / h],
+    #                       [1461. / w, 275. / h, 1565. / w, 311. / h],
+    #                       [414. / w, 5. / h, 1506. / w, 823. / h],
+    #                       [1185. / w, 16. / h, 1620. / w, 368. / h]])
+    # dataencoder.test_encode(boxes, img, torch.LongTensor([1, 1, 1, 2, 2]))
 
