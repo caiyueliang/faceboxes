@@ -433,6 +433,9 @@ class DataEncoder:
         bboxes(tensor) [N,4]
         scores(tensor) [N,]
         '''
+        print('bboxes', bboxes.size())
+        print('scores', scores.size())
+
         x1 = bboxes[:,0]
         y1 = bboxes[:,1]
         x2 = bboxes[:,2]
@@ -508,7 +511,11 @@ class DataEncoder:
         # print('boxes', boxes.size(), boxes[ids])
 
         keep = self.nms(boxes[ids], max_conf[ids], nms_threshold)   # .squeeze(1))
+        print('keep', keep)
 
+        print('boxes', boxes[ids][keep])
+        print('labels', labels[ids][keep])
+        print('max_conf', max_conf[ids][keep])
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
 
 
